@@ -1,0 +1,262 @@
+@import "tailwindcss";
+
+:root {
+  /* Base Neutrals */
+  --bg-primary: #0A0A0B;
+  --bg-elevated: #141416;
+  --bg-surface: #1A1A1D;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1A6;
+  --text-tertiary: #6B6B70;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.16);
+
+  /* Accent Colors */
+  --accent-primary: #E8E4DF;
+  --accent-data: #4ECDC4;
+  --accent-focus: #FF6B35;
+  --accent-subtle: rgba(232, 228, 223, 0.1);
+
+  /* Materials */
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(232, 228, 223, 0.1);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Easing */
+  --ease-micro: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* Durations */
+  --duration-micro: 150ms;
+  --duration-fast: 300ms;
+  --duration-standard: 500ms;
+  --duration-slow: 800ms;
+  --duration-cinematic: 1200ms;
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  height: 100svh;
+  min-height: 100svh;
+}
+
+#__next, main {
+  width: 100%;
+  height: 100%;
+}
+
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Glass Panel Utility */
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+
+/* Text Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Canvas Container */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+/* UI Layer */
+.ui-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.ui-layer > * {
+  pointer-events: auto;
+}
+
+.section-shell {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 72px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
+}
+
+@media (min-width: 1024px) {
+  .section-shell {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Landscape mode for mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .section-shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 48px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+  }
+}
+
+/* Landscape layout adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .landscape-hide {
+    display: none !important;
+  }
+
+  .landscape-compact {
+    font-size: 0.875rem !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* Typography Scale */
+.heading-1 {
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.heading-2 {
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.heading-3 {
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.body-large {
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.body {
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+/* Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
