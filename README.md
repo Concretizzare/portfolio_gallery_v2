@@ -4,7 +4,7 @@ Personal portfolio showcasing web development projects and open source contribut
 
 ## Live Site
 
-**Production**: [portfolio-gallery.vercel.app](https://portfolio-gallery.vercel.app)
+**Production**: [portfolio-gallery-v2.vercel.app](https://portfolio-gallery-v2.vercel.app)
 
 ## Tech Stack
 
