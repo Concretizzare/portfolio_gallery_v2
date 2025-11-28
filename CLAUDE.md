@@ -24,14 +24,36 @@ Single-page portfolio with section-based scroll navigation and 3D background. Al
 
 ### Section Flow
 
-9 sections in order: `landing` → `index` → 5 projects → `about` → `contact`
+11 sections in order: `intro` → `services` → 5 projects → `opensource` → `showcase` → `about` → `contact`
 
 ```typescript
-type Section = 'landing' | 'index' | 'project-ecommerce' | 'project-hybrid'
-  | 'project-boutique' | 'project-shipping' | 'project-ai-render' | 'about' | 'contact'
+const sections = [
+  { id: 'intro', label: 'Intro' },
+  { id: 'services', label: 'Services' },         // 4-card service overview
+  ...PROJECTS,                                    // 5 project sections
+  { id: 'opensource', label: 'MCP Servers' },    // Open source MCP servers
+  { id: 'showcase', label: 'Showcase' },         // AI media presentation
+  { id: 'about', label: 'About' },
+  { id: 'contact', label: 'Contact' },
+]
 ```
 
-Section order defined in `SECTION_ORDER` array in `src/store/navigation.ts`.
+### Services Section
+
+4-card overview before projects showing full consulting capabilities:
+- **Sales & Marketing**: E-commerce, marketing automation, AI media generation
+- **Finance**: P&L management, cash flow forecasting, analytics
+- **Operations**: Container logistics, supply chain, scheduling
+- **Agent & AI**: AI development, MCP servers, API integrations, Smart Render
+
+### Showcase Section
+
+AI-powered media presentation after MCP servers:
+- Opens full-screen modal with before/after comparisons
+- Showcases image-to-video generation and model integration
+- Media assets stored in `public/showcase/` (reel1, reel3, reel4, vasca_modella)
+
+Section order defined in `sections` array in `src/app/page.tsx`.
 
 ### State Management (Zustand)
 
@@ -103,6 +125,12 @@ RESEND_API_KEY=...
 CONTACT_EMAIL=your-inbox@example.com
 ```
 
+## Design Guidelines
+
+- **DO NOT modify the current design**: The existing portfolio gallery design/style is final and must not be changed
+- **New sections only**: Style changes are allowed only for newly added sections
+- **Frontend skill required**: All frontend modifications MUST use the `frontend-design` skill
+
 ## Git Workflow
 
 - Remote: `https://github.com/Concretizzare/portfolio_gallery_v2.git`
@@ -111,6 +139,6 @@ CONTACT_EMAIL=your-inbox@example.com
 
 ## Deployment
 
-- Platform: Vercel
-- Project name: `portfolio_gallery_v2`
-- Production URL: portfolio-gallery-v2.vercel.app (or custom domain)
+- **Current workflow**: Local development only, no Vercel deployment
+- Commit changes to GitHub: `https://github.com/Concretizzare/portfolio_gallery_v2.git`
+- Run server locally with `npm run dev`

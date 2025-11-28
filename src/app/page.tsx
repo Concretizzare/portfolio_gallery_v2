@@ -4,13 +4,230 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { PROJECTS } from '@/lib/utils'
 
+// Services data for the 4-card section
+const SERVICES = [
+  {
+    id: 'sales-marketing',
+    title: 'Sales & Marketing',
+    subtitle: 'Drive Revenue Growth',
+    description: 'E-commerce platforms, marketing automation, and AI-powered media generation for maximum market impact.',
+    items: ['E-commerce Development', 'Marketing Automation', 'AI Media Generation', 'Brand Strategy'],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    ),
+    gradient: 'from-rose-500/20 via-orange-500/10 to-transparent',
+    accentColor: '#FF6B35',
+  },
+  {
+    id: 'finance',
+    title: 'Finance',
+    subtitle: 'Strategic Financial Control',
+    description: 'P&L management, cash flow forecasting, and financial analytics for data-driven business decisions.',
+    items: ['P&L Management', 'Cash Flow Forecast', 'Financial Analytics', 'Budget Planning'],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+    ),
+    gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+    accentColor: '#4ECDC4',
+  },
+  {
+    id: 'operations',
+    title: 'Operations',
+    subtitle: 'Streamlined Logistics',
+    description: 'End-to-end supply chain management, container logistics, scheduling, and organizational optimization.',
+    items: ['Container Logistics', 'Supply Chain', 'Scheduling Systems', 'Process Optimization'],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+        <rect x="1" y="3" width="15" height="13" rx="2" />
+        <path d="M16 8h4l3 4v5h-7V8z" />
+        <circle cx="5.5" cy="18.5" r="2.5" />
+        <circle cx="18.5" cy="18.5" r="2.5" />
+      </svg>
+    ),
+    gradient: 'from-blue-500/20 via-indigo-500/10 to-transparent',
+    accentColor: '#6366F1',
+  },
+  {
+    id: 'agent',
+    title: 'Agent & AI',
+    subtitle: 'Intelligent Automation',
+    description: 'Custom AI agents, MCP integrations (Outlook, NetSuite), API development, and smart rendering solutions.',
+    items: ['AI Development', 'MCP Servers', 'API Integrations', 'Smart Render'],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
+        <path d="M9 14v2" />
+        <path d="M15 14v2" />
+      </svg>
+    ),
+    gradient: 'from-violet-500/20 via-purple-500/10 to-transparent',
+    accentColor: '#A855F7',
+  },
+]
+
+// Showcase data for media presentation - ALL reels from presentation_marketing
+const SHOWCASE_ITEMS = [
+  {
+    id: 'reel1',
+    title: 'Reel 1 - Dynamic Motion',
+    description: 'Transforming static photography into dynamic motion, breathing life into still imagery with cinematic movement.',
+    originals: [
+      '/showcase/reel1/frames/C5iKX3oMlyW_1.jpg',
+      '/showcase/reel1/frames/C5iKX3oMlyW_2.jpg',
+      '/showcase/reel1/frames/C5iKX3oMlyW_4.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel1/kling_20251008_Image_to_Video_Maintain_a_14_0 (1).mp4', type: 'video' },
+      { src: '/showcase/reel1/kling_20251008_Image_to_Video_Maintain_a_3_0 (1).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel2',
+    title: 'Reel 2 - Camera Movement',
+    description: 'Creating dynamic camera movements and cinematic transitions from static photographs.',
+    originals: ['/showcase/reel2/C2W36nes1Zt.jpg'],
+    generated: [
+      { src: '/showcase/reel2/kling_20251005_Image_to_Video_The_camera_5541_0 (1).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel3',
+    title: 'Reel 3 - Creative Directions',
+    description: 'Multiple motion interpretations from the same source, exploring diverse creative directions.',
+    originals: [
+      '/showcase/reel3/Cy2jjpRMBe7_1.jpg',
+      '/showcase/reel3/Cy2jjpRMBe7_2.jpg',
+      '/showcase/reel3/Cy2jjpRMBe7_3.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel3/kling_20251004_Image_to_Video_Maintain_a_4737_0 (1).mp4', type: 'video' },
+      { src: '/showcase/reel3/kling_20251005_Image_to_Video__269_0.mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel4',
+    title: 'Reel 4 - Brand Storytelling',
+    description: 'Building cohesive visual narratives with sequential motion, perfect for brand storytelling.',
+    originals: [
+      '/showcase/reel4/C2UCZBToZJi_1.jpg',
+      '/showcase/reel4/C2UCZBToZJi_2.jpg',
+      '/showcase/reel4/C2UCZBToZJi_3.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel4/kling_20251007_Image_to_Video_Maintain_a_5684_0 (1).mp4', type: 'video' },
+      { src: '/showcase/reel4/kling_20251007_Image_to_Video_Maintain_a_5696_0 (1).mp4', type: 'video' },
+      { src: '/showcase/reel4/kling_20251007_Image_to_Video_Maintain_a_5703_0 (1).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel5',
+    title: 'Reel 5 - Luxury Quality',
+    description: 'Maintaining premium quality and aesthetic integrity in motion content for luxury brands.',
+    originals: [
+      '/showcase/reel5/frames/C4nMnxSL38V_2.jpg',
+      '/showcase/reel5/frames/C4nMnxSL38V_3.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel5/kling_20251007_Image_to_Video_Maintain_a_6051_0 (1).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel6',
+    title: 'Reel 6 - Cinematic Sequences',
+    description: 'Professional-grade cinematic sequences with sophisticated motion dynamics and timing.',
+    originals: [
+      '/showcase/reel6/C7-4EpjIDEW_1.jpg',
+      '/showcase/reel6/C7-4EpjIDEW_2.jpg',
+      '/showcase/reel6/C7-4EpjIDEW_3.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel6/kling_20251007_Image_to_Video_Maintain_a_5829_0 (1).mp4', type: 'video' },
+      { src: '/showcase/reel6/kling_20251007_Image_to_Video_Maintain_a_5836_0 (1).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel7',
+    title: 'Reel 7 - Atmospheric Motion',
+    description: 'Subtle atmospheric motion that enhances mood and emotional depth.',
+    originals: [
+      '/showcase/reel7/C_Kh-H6ouu3_1.jpg',
+      '/showcase/reel7/C_Kh-H6ouu3_2.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reel7/kling_20251003_Image_to_Video__5677_0 (2).mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'reel8',
+    title: 'Reel 8 - Full Pipeline',
+    description: 'Complete creative pipeline: from source image to generated frames to animated videos.',
+    originals: [
+      '/showcase/reel8/original/BORGHI_bathtub_4.jpg',
+      '/showcase/reel8/original/C3hbrhrsmrA.jpg',
+    ],
+    generatedFrames: [
+      '/showcase/reel8/frame generated/1def.png',
+      '/showcase/reel8/frame generated/2def.png',
+      '/showcase/reel8/frame generated/3def.png',
+      '/showcase/reel8/frame generated/4def.png',
+      '/showcase/reel8/frame generated/5def.png',
+    ],
+    generated: [
+      { src: '/showcase/reel8/all clip/kling_20251009_Image_to_Video_Maintain_a_5585_0.mp4', type: 'video' },
+      { src: '/showcase/reel8/all clip/kling_20251009_Image_to_Video_Maintain_a_5590_0.mp4', type: 'video' },
+      { src: '/showcase/reel8/all clip/kling_20251009_Image_to_Video_Maintain_a_5591_0.mp4', type: 'video' },
+      { src: '/showcase/reel8/all clip/kling_20251009_Image_to_Video_Maintain_a_5595_0.mp4', type: 'video' },
+    ],
+  },
+  {
+    id: 'model-integration',
+    title: 'Model Integration',
+    description: 'Adding models and people seamlessly into existing scenes with precise composition and lighting.',
+    originals: ['/showcase/vasca_modella/C_e4sQ7IGnx.jpg'],
+    generated: [
+      { src: '/showcase/vasca_modella/Generated Image October 05, 2025 - 4_15PM.png', type: 'image' },
+      { src: '/showcase/vasca_modella/vlcsnap-2025-10-08-18h26m14s756.png', type: 'image' },
+    ],
+  },
+  {
+    id: 'reflex-post',
+    title: 'Multi-Style Generation',
+    description: 'From a single source, we generate multiple variations maintaining consistent subject identity while exploring diverse styles.',
+    originals: [
+      '/showcase/reflex_post/originals/C4nMnxSL38V_2.jpg',
+      '/showcase/reflex_post/originals/Cy2jjpRMBe7_2.jpg',
+      '/showcase/reflex_post/originals/C7-4EpjIDEW_2.jpg',
+    ],
+    generated: [
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 4_19PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 4_55PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 4_58PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 5_03PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 5_12PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 5_23PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 5_52PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 5_53PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 6_01PM.png', type: 'image' },
+      { src: '/showcase/reflex_post/Generated Image October 08, 2025 - 6_09PM.png', type: 'image' },
+    ],
+  },
+]
+
 export default function GalleryPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState(0)
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [showShowcase, setShowShowcase] = useState(false)
+  const [activeShowcaseItem, setActiveShowcaseItem] = useState(0)
   const closingByPop = useRef(false)
+  const showcaseClosingByPop = useRef(false)
 
   const projectHashMap: Record<string, string> = {
     ecommerce: 'antoniolupi',
@@ -66,8 +283,10 @@ export default function GalleryPage() {
 
   const sections = [
     { id: 'intro', label: 'Intro' },
+    { id: 'services', label: 'Services' },
     ...PROJECTS.map(p => ({ id: p.id, label: p.title })),
     { id: 'opensource', label: 'MCP Servers' },
+    { id: 'showcase', label: 'Showcase' },
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ]
@@ -81,7 +300,7 @@ export default function GalleryPage() {
     let touchDelta = 0
 
     const handleWheel = (e: WheelEvent) => {
-      if (selectedProject) return
+      if (selectedProject || showShowcase) return
 
       // Detect if it's a mouse wheel (large deltaY) or touchpad (small deltaY)
       const isTouchpad = Math.abs(e.deltaY) < 50
@@ -131,20 +350,20 @@ export default function GalleryPage() {
     }
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (selectedProject) return
+      if (selectedProject || showShowcase) return
       touchStartY = e.touches[0].clientY
       touchDelta = 0
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (selectedProject) return
+      if (selectedProject || showShowcase) return
       e.preventDefault()
       const currentY = e.touches[0].clientY
       touchDelta = touchStartY - currentY
     }
 
     const handleTouchEnd = () => {
-      if (selectedProject) return
+      if (selectedProject || showShowcase) return
 
       if (Math.abs(touchDelta) > 50 && !isScrolling) {
         isScrolling = true
@@ -171,7 +390,7 @@ export default function GalleryPage() {
       clearTimeout(scrollTimeout)
       clearTimeout(touchpadTimeout)
     }
-  }, [sections.length, selectedProject])
+  }, [sections.length, selectedProject, showShowcase])
 
   useEffect(() => {
     if (!selectedProject) return
@@ -194,6 +413,28 @@ export default function GalleryPage() {
       }
     }
   }, [selectedProject])
+
+  // Handle browser back button for Showcase modal
+  useEffect(() => {
+    if (!showShowcase) return
+
+    showcaseClosingByPop.current = false
+
+    const handlePopState = () => {
+      showcaseClosingByPop.current = true
+      setShowShowcase(false)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    window.history.pushState({ showcase: true }, '', '#showcase')
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      if (!showcaseClosingByPop.current) {
+        window.history.back()
+      }
+    }
+  }, [showShowcase])
 
   const project = selectedProject ? PROJECTS.find(p => p.id === selectedProject) : null
 
@@ -281,9 +522,130 @@ export default function GalleryPage() {
               </div>
         </GallerySection>
 
+        {/* Services Section - 4 Cards */}
+        <GallerySection isActive={activeSection === 1}>
+          <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="max-w-6xl w-full"
+            >
+              <div className="text-center mb-8 md:mb-12">
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-xs text-[#6B6B70] uppercase tracking-[0.2em] mb-4 block font-medium"
+                >
+                  Full-Service Consulting
+                </motion.span>
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl md:text-3xl lg:text-4xl font-light"
+                >
+                  From A to Z
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-[#6B6B70] text-sm md:text-base mt-3 max-w-lg mx-auto"
+                >
+                  Complete business transformation across every department
+                </motion.p>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                {SERVICES.map((service, idx) => (
+                  <motion.div
+                    key={service.id}
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    whileHover={{
+                      scale: 1.02,
+                      borderColor: service.accentColor + '60',
+                      transition: { duration: 0.2 }
+                    }}
+                    transition={{
+                      delay: 0.3 + idx * 0.1,
+                      duration: 0.5,
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
+                    className="group relative p-4 md:p-5 lg:p-6 bg-[#141416] rounded-xl border border-[#2a2a2d] overflow-hidden cursor-default"
+                  >
+                    {/* Gradient overlay */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                    />
+
+                    {/* Accent line */}
+                    <motion.div
+                      className="absolute top-0 left-0 right-0 h-[2px]"
+                      style={{ backgroundColor: service.accentColor }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ delay: 0.5 + idx * 0.1, duration: 0.6 }}
+                    />
+
+                    <div className="relative z-10">
+                      {/* Icon */}
+                      <div
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
+                        style={{
+                          backgroundColor: service.accentColor + '15',
+                          color: service.accentColor
+                        }}
+                      >
+                        {service.icon}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-base md:text-lg font-medium text-[#E8E4DF] mb-1">
+                        {service.title}
+                      </h3>
+                      <p className="text-xs text-[#6B6B70] mb-3 hidden md:block">
+                        {service.subtitle}
+                      </p>
+
+                      {/* Description - Hidden on mobile */}
+                      <p className="text-xs md:text-sm text-[#A1A1A6] leading-relaxed mb-4 line-clamp-2 md:line-clamp-3 hidden lg:block">
+                        {service.description}
+                      </p>
+
+                      {/* Items */}
+                      <div className="space-y-1.5">
+                        {service.items.slice(0, 3).map((item, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 text-xs text-[#6B6B70]"
+                          >
+                            <div
+                              className="w-1 h-1 rounded-full"
+                              style={{ backgroundColor: service.accentColor }}
+                            />
+                            <span className="truncate">{item}</span>
+                          </div>
+                        ))}
+                        {service.items.length > 3 && (
+                          <div className="text-xs text-[#6B6B70] pl-3">
+                            +{service.items.length - 3} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </GallerySection>
+
         {/* Project Sections */}
         {PROJECTS.map((proj, i) => (
-          <GallerySection key={proj.id} isActive={activeSection === i + 1}>
+          <GallerySection key={proj.id} isActive={activeSection === i + 2}>
                 <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 lg:gap-16 max-w-6xl w-full items-center landscape-grid">
                     {/* Left - Info */}
@@ -389,7 +751,7 @@ export default function GalleryPage() {
         ))}
 
         {/* Open Source Section */}
-        <GallerySection isActive={activeSection === sections.length - 3}>
+        <GallerySection isActive={activeSection === sections.length - 4}>
               <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
@@ -444,6 +806,88 @@ export default function GalleryPage() {
                   </div>
                 </motion.div>
               </div>
+        </GallerySection>
+
+        {/* Showcase Section - Media Presentation */}
+        <GallerySection isActive={activeSection === sections.length - 3}>
+          <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="max-w-4xl w-full text-center"
+            >
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-xs text-[#6B6B70] uppercase tracking-[0.2em] mb-4 block"
+              >
+                Creative Capabilities
+              </motion.span>
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl md:text-4xl lg:text-5xl font-light mb-4"
+              >
+                Visual Excellence
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-[#6B6B70] text-sm md:text-base mb-10 max-w-lg mx-auto"
+              >
+                AI-powered media generation showcasing our ability to transform static content into dynamic experiences
+              </motion.p>
+
+              {/* Preview Cards - Show first 3 items */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                {SHOWCASE_ITEMS.slice(0, 3).map((item, idx) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + idx * 0.1 }}
+                    className="relative group rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square"
+                  >
+                    <img
+                      src={item.originals[0]}
+                      alt={item.title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
+                      <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
+                    </div>
+                    {item.generated.some(g => g.type === 'video') && (
+                      <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+                          <polygon points="5 3 19 12 5 21" />
+                        </svg>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* CTA Button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                onClick={() => setShowShowcase(true)}
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#E8E4DF] to-[#d4cfc8] text-[#0A0A0B] rounded-lg font-medium text-sm hover:opacity-90 transition-all hover:gap-4"
+              >
+                <span>Explore Full Showcase</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </motion.button>
+            </motion.div>
+          </div>
         </GallerySection>
 
         {/* About Section */}
@@ -767,6 +1211,246 @@ export default function GalleryPage() {
                 )}
 
               </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Showcase Modal - Full Presentation */}
+      <AnimatePresence>
+        {showShowcase && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#0A0A0B] overflow-y-auto overscroll-contain"
+            style={{ touchAction: 'pan-y' }}
+            onWheel={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowShowcase(false)}
+              className="fixed top-6 right-6 z-20 text-[#6B6B70] hover:text-white transition-colors flex items-center gap-2"
+            >
+              <span className="text-sm">Close</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Header */}
+            <div className="pt-20 pb-8 px-6 md:px-12 text-center border-b border-[#2a2a2d]">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-3xl md:text-5xl font-light mb-4"
+              >
+                Visual Excellence
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-[#6B6B70] text-sm md:text-base max-w-2xl mx-auto"
+              >
+                A showcase of creative and technical mastery through generative AI content.
+                See how we transform static images into dynamic motion and integrate models seamlessly into scenes.
+              </motion.p>
+            </div>
+
+            {/* Navigation Tabs - Scrollable */}
+            <div className="sticky top-0 z-10 bg-[#0A0A0B]/95 backdrop-blur-lg border-b border-[#2a2a2d]">
+              <div className="flex overflow-x-auto gap-1 p-4 max-w-7xl mx-auto scrollbar-hide">
+                {SHOWCASE_ITEMS.map((item, idx) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveShowcaseItem(idx)}
+                    className={`px-4 py-2 rounded-lg text-sm transition-all whitespace-nowrap flex-shrink-0 ${
+                      activeShowcaseItem === idx
+                        ? 'bg-[#E8E4DF] text-[#0A0A0B] font-medium'
+                        : 'text-[#6B6B70] hover:text-white hover:bg-[#1a1a1d]'
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content - Single Section View with Navigation */}
+            <div className="px-4 md:px-12 py-12 max-w-7xl mx-auto min-h-[60vh]">
+              <AnimatePresence mode="wait">
+                {(() => {
+                  const item = SHOWCASE_ITEMS[activeShowcaseItem]
+                  return (
+                    <motion.div
+                      key={activeShowcaseItem}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {/* Section Header */}
+                      <div className="text-center mb-8">
+                        <span className="text-xs text-[#6B6B70] uppercase tracking-widest mb-2 block">
+                          {String(activeShowcaseItem + 1).padStart(2, '0')} / {String(SHOWCASE_ITEMS.length).padStart(2, '0')}
+                        </span>
+                        <h2 className="text-2xl md:text-3xl font-light mb-2">
+                          {item.title}
+                        </h2>
+                        <p className="text-[#6B6B70] max-w-2xl mx-auto">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      {/* Content Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Originals */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-xs text-[#6B6B70] uppercase tracking-widest">
+                            <div className="w-2 h-2 rounded-full bg-[#6B6B70]" />
+                            Original{item.originals.length > 1 ? 's' : ''}
+                          </div>
+                          <div className={`grid gap-3 ${item.originals.length > 1 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
+                            {item.originals.map((src, i) => (
+                              <div
+                                key={i}
+                                className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square"
+                              >
+                                <img
+                                  src={src}
+                                  alt={`Original ${i + 1}`}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Generated */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-widest">
+                            <div className="w-2 h-2 rounded-full bg-[#4ECDC4]" />
+                            <span className="text-[#4ECDC4]">AI Generated</span>
+                          </div>
+                          <div className={`grid gap-3 ${item.generated.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                            {item.generated.map((gen, i) => (
+                              <div
+                                key={i}
+                                className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square group"
+                              >
+                                {gen.type === 'video' ? (
+                                  <>
+                                    <video
+                                      key={`${activeShowcaseItem}-${i}`}
+                                      autoPlay
+                                      loop
+                                      muted
+                                      playsInline
+                                      className="w-full h-full object-cover"
+                                    >
+                                      <source src={gen.src} type="video/mp4" />
+                                    </video>
+                                    <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-[10px] text-white flex items-center gap-1.5">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                      Video
+                                    </div>
+                                  </>
+                                ) : (
+                                  <img
+                                    src={gen.src}
+                                    alt={`Generated ${i + 1}`}
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Generated Frames (for reel8) */}
+                          {'generatedFrames' in item && item.generatedFrames && (
+                            <div className="mt-6">
+                              <div className="flex items-center gap-2 text-xs uppercase tracking-widest mb-3">
+                                <div className="w-2 h-2 rounded-full bg-[#A855F7]" />
+                                <span className="text-[#A855F7]">Generated Frames</span>
+                              </div>
+                              <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                                {item.generatedFrames.map((src, i) => (
+                                  <div
+                                    key={i}
+                                    className="relative rounded-lg overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square"
+                                  >
+                                    <img
+                                      src={src}
+                                      alt={`Frame ${i + 1}`}
+                                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Navigation Arrows */}
+                      <div className="flex justify-center items-center gap-4 mt-12">
+                        <button
+                          onClick={() => setActiveShowcaseItem(prev => Math.max(0, prev - 1))}
+                          disabled={activeShowcaseItem === 0}
+                          className="p-3 rounded-full border border-[#2a2a2d] text-[#6B6B70] hover:text-white hover:border-[#4a4a4d] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M15 18l-6-6 6-6" />
+                          </svg>
+                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {SHOWCASE_ITEMS.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setActiveShowcaseItem(idx)}
+                              className={`h-2 rounded-full transition-all ${
+                                activeShowcaseItem === idx ? 'bg-[#E8E4DF] w-6' : 'bg-[#3a3a3d] w-2 hover:bg-[#5a5a5d]'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setActiveShowcaseItem(prev => Math.min(SHOWCASE_ITEMS.length - 1, prev + 1))}
+                          disabled={activeShowcaseItem === SHOWCASE_ITEMS.length - 1}
+                          className="p-3 rounded-full border border-[#2a2a2d] text-[#6B6B70] hover:text-white hover:border-[#4a4a4d] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )
+                })()}
+              </AnimatePresence>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-[#2a2a2d] px-6 py-12 text-center bg-[#0A0A0B]">
+              <p className="text-[#6B6B70] text-sm mb-6">
+                Interested in how we can transform your visual content?
+              </p>
+              <button
+                onClick={() => {
+                  setShowShowcase(false)
+                  setActiveSection(sections.length - 1)
+                }}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#E8E4DF] text-[#0A0A0B] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Get in Touch
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </motion.div>
         )}
