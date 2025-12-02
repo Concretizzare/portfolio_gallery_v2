@@ -14,20 +14,20 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
   // If invalid category, render homepage
   if (!categoryData) {
-    return <GalleryPage key="home" />
+    return <GalleryPage />
   }
 
   // Handle Visual Excellence showcase (special case for Sales & Marketing)
   if (project === 'visual-excellence' && category === 'sales_marketing') {
-    return <GalleryPage key={`${category}-showcase`} initialCategory={category} initialShowcase={true} />
+    return <GalleryPage initialCategory={category} initialShowcase={true} />
   }
 
   const projectId = getProjectIdBySlug(project)
 
   // If invalid project, render category page
   if (!projectId) {
-    return <GalleryPage key={category} initialCategory={category} />
+    return <GalleryPage initialCategory={category} />
   }
 
-  return <GalleryPage key={`${category}-${projectId}`} initialCategory={category} initialProject={projectId} />
+  return <GalleryPage initialCategory={category} initialProject={projectId} />
 }
