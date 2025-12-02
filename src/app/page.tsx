@@ -741,7 +741,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full aspect-[3/5] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full h-[60svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
