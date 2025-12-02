@@ -755,8 +755,8 @@ export default function GalleryPage() {
                     >
                       {/* Card Layout: Vertical on mobile, Horizontal on desktop */}
                       <div className="flex flex-col md:flex-row h-full">
-                        {/* Top/Left - Video (45% height on mobile, 45% width on desktop) */}
-                        <div className="relative w-full h-[45%] md:w-[45%] md:h-full overflow-hidden">
+                        {/* Top/Left - Video (50% height on mobile, 45% width on desktop) */}
+                        <div className="relative w-full h-[50%] md:w-[45%] md:h-full overflow-hidden">
                           {category.id === 'sales-marketing' ? (
                             /* Sales & Marketing: Camera movement video */
                             <video
@@ -958,7 +958,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Progress bars - positioned at bottom, between cards and screen edge */}
-            <div className="absolute bottom-[8%] left-0 right-0 flex items-center justify-center gap-3">
+            <div className="absolute bottom-[2%] md:bottom-[8%] left-0 right-0 flex items-center justify-center gap-3">
               {PORTFOLIO_CATEGORIES.map((category, idx) => (
                 <button
                   key={category.id}
