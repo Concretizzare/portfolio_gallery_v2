@@ -741,7 +741,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full h-[65svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full h-[70svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -846,7 +846,7 @@ export default function GalleryPage() {
                         </div>
 
                         {/* Bottom/Right - Content (50% height on mobile, 55% width on desktop) */}
-                        <div className="flex-1 flex flex-col justify-start md:justify-center px-4 pt-3 pb-4 sm:p-6 md:p-10 lg:p-12">
+                        <div className="flex-1 flex flex-col justify-start md:justify-center px-4 pt-6 pb-4 sm:p-6 md:p-10 lg:p-12">
                           {/* Title */}
                           <motion.h2
                             className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-2 sm:mb-4 md:mb-5 tracking-tight"
