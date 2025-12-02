@@ -741,7 +741,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full aspect-[3/4] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full aspect-[3/5] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -755,8 +755,8 @@ export default function GalleryPage() {
                     >
                       {/* Card Layout: Vertical on mobile, Horizontal on desktop */}
                       <div className="flex flex-col md:flex-row h-full">
-                        {/* Top/Left - Video (38% height on mobile, 45% width on desktop) */}
-                        <div className="relative w-full h-[38%] md:w-[45%] md:h-full overflow-hidden">
+                        {/* Top/Left - Video (45% height on mobile, 45% width on desktop) */}
+                        <div className="relative w-full h-[45%] md:w-[45%] md:h-full overflow-hidden">
                           {category.id === 'sales-marketing' ? (
                             /* Sales & Marketing: Camera movement video */
                             <video
