@@ -252,6 +252,7 @@ export default function GalleryPage() {
   const [categorySectionIndex, setCategorySectionIndex] = useState(0)
   const [projectParentCategory, setProjectParentCategory] = useState<string | null>(null)
   const [playingPreviewReel, setPlayingPreviewReel] = useState<string | null>(null)
+  const [showcasePreviewIndex, setShowcasePreviewIndex] = useState(0)
   const closingByPop = useRef(false)
   const categoryClosingByPop = useRef(false)
   const showcaseClosingByPop = useRef(false)
@@ -584,6 +585,18 @@ export default function GalleryPage() {
       clearTimeout(scrollTimeout)
       clearTimeout(touchpadTimeout)
     }
+  }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
+
+  // Auto-rotate showcase preview carousel on mobile (6800ms)
+  useEffect(() => {
+    if (!selectedCategory || !currentCategory?.showShowcase) return
+    if (categorySectionIndex !== categoryProjects.length + 1) return
+
+    const interval = setInterval(() => {
+      setShowcasePreviewIndex(prev => (prev + 1) % 3)
+    }, 6800)
+
+    return () => clearInterval(interval)
   }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
 
   const project = selectedProject ? PROJECTS.find(p => p.id === selectedProject) : null
@@ -1838,8 +1851,69 @@ export default function GalleryPage() {
                       AI-powered media generation showcasing our ability to transform static content into dynamic experiences
                     </p>
 
-                    {/* Preview Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
+                    {/* Preview Cards - Carousel on mobile, Grid on desktop */}
+                    {/* Mobile Carousel */}
+                    <div className="md:hidden relative mb-6">
+                      <div className="overflow-hidden">
+                        <motion.div
+                          className="flex"
+                          animate={{ x: `-${showcasePreviewIndex * 100}%` }}
+                          transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+                        >
+                          {SHOWCASE_ITEMS.slice(0, 3).map((item, i) => {
+                            const videoSrc = item.generated.find(g => g.type === 'video')?.src
+                            return (
+                              <div key={item.id} className="w-full flex-shrink-0 px-2">
+                                <div
+                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-video"
+                                >
+                                  {videoSrc ? (
+                                    <video
+                                      autoPlay
+                                      loop
+                                      muted
+                                      playsInline
+                                      className="w-full h-full object-cover"
+                                    >
+                                      <source src={videoSrc} type="video/mp4" />
+                                    </video>
+                                  ) : (
+                                    <img
+                                      src={item.originals[0]}
+                                      alt={item.title}
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                    />
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
+                                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                                    <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
+                                    <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </motion.div>
+                      </div>
+                      {/* Carousel Indicators */}
+                      <div className="flex justify-center gap-2 mt-4">
+                        {[0, 1, 2].map((idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setShowcasePreviewIndex(idx)}
+                            className="h-1 rounded-full transition-all duration-300"
+                            style={{
+                              width: showcasePreviewIndex === idx ? '24px' : '8px',
+                              background: showcasePreviewIndex === idx ? currentCategory.accentColor : '#3a3a3d'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Desktop Grid */}
+                    <div className="hidden md:grid md:grid-cols-3 gap-4 mb-8">
                       {SHOWCASE_ITEMS.slice(0, 3).map((item, i) => {
                         const videoSrc = item.generated.find(g => g.type === 'video')?.src
                         const isPlaying = playingPreviewReel === item.id
@@ -1854,7 +1928,7 @@ export default function GalleryPage() {
                                 setPlayingPreviewReel(isPlaying ? null : item.id)
                               }
                             }}
-                            className="relative group rounded-lg md:rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-video md:aspect-square cursor-pointer"
+                            className="relative group rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square cursor-pointer"
                           >
                             {isPlaying && videoSrc ? (
                               <video
@@ -1875,12 +1949,12 @@ export default function GalleryPage() {
                               />
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
-                              <h4 className="text-[10px] md:text-sm font-medium text-[#E8E4DF] mb-0.5 md:mb-1">{item.title}</h4>
-                              <p className="text-[8px] md:text-xs text-[#6B6B70] line-clamp-1 md:line-clamp-2 hidden md:block">{item.description}</p>
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                              <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
+                              <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
                             </div>
                             {videoSrc && (
-                              <div className={`absolute top-1.5 right-1.5 md:top-3 md:right-3 w-5 h-5 md:w-8 md:h-8 rounded-full ${isPlaying ? 'bg-white/20' : 'bg-white/10'} backdrop-blur-sm flex items-center justify-center transition-all`}>
+                              <div className={`absolute top-3 right-3 w-8 h-8 rounded-full ${isPlaying ? 'bg-white/20' : 'bg-white/10'} backdrop-blur-sm flex items-center justify-center transition-all`}>
                                 {isPlaying ? (
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                                     <rect x="6" y="4" width="4" height="16" />
