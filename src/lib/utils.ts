@@ -223,3 +223,100 @@ export const PROJECTS = [
 ] as const
 
 export type Project = typeof PROJECTS[number]
+
+// Portfolio Gallery categories with project mappings
+export type PortfolioCategory = {
+  id: string
+  slug: string
+  title: string
+  subtitle: string
+  description: string
+  image: string | null
+  accentColor: string
+  gradient: string
+  projectIds: string[]
+  mcpProjects?: boolean
+  showShowcase?: boolean
+}
+
+export const PORTFOLIO_CATEGORIES: PortfolioCategory[] = [
+  {
+    id: 'sales-marketing',
+    slug: 'sales_marketing',
+    title: 'Sales & Marketing',
+    subtitle: 'E-Commerce & Brand Platforms',
+    description: 'Full-scale e-commerce solutions, luxury brand websites, and marketing-driven digital experiences.',
+    image: '/assets/projects/ecommerce/homepage.png',
+    accentColor: '#FF6B35',
+    gradient: 'from-orange-600/40 via-rose-600/20 to-transparent',
+    projectIds: ['ecommerce', 'hybrid', 'boutique'],
+    showShowcase: true,
+  },
+  {
+    id: 'finance',
+    slug: 'finance',
+    title: 'Finance',
+    subtitle: 'Financial Intelligence & Analytics',
+    description: 'P&L management systems, budget tracking dashboards, profitability analysis, and data-driven financial decision tools.',
+    image: '/assets/projects/budget-dashboard/homepage.png',
+    accentColor: '#4ECDC4',
+    gradient: 'from-emerald-600/40 via-teal-600/20 to-transparent',
+    projectIds: ['budget-dashboard', 'profitability-analysis'],
+  },
+  {
+    id: 'operations',
+    slug: 'operations',
+    title: 'Operations',
+    subtitle: 'Logistics & Supply Chain',
+    description: 'Real-time shipping calculators, container optimization, warehouse management, and end-to-end supply chain solutions.',
+    image: '/assets/projects/shipping/homepage.png',
+    accentColor: '#6366F1',
+    gradient: 'from-indigo-600/40 via-blue-600/20 to-transparent',
+    projectIds: ['shipping', 'logistics'],
+  },
+  {
+    id: 'agent',
+    slug: 'agent_ai',
+    title: 'Agent & AI',
+    subtitle: 'Intelligent Automation',
+    description: 'Custom AI agents, MCP server integrations, and smart rendering solutions powered by machine learning.',
+    image: '/assets/projects/ai-render/homepage.png',
+    accentColor: '#10B981',
+    gradient: 'from-emerald-600/40 via-green-600/20 to-transparent',
+    projectIds: ['ai-render'],
+    mcpProjects: true,
+  },
+]
+
+// Project slug mapping for URLs
+export const PROJECT_SLUG_MAP: Record<string, string> = {
+  ecommerce: 'antoniolupi',
+  hybrid: 'luxury',
+  boutique: 'feelippos',
+  shipping: 'shippingapp',
+  'ai-render': 'smartrender',
+  logistics: 'logistics',
+  'budget-dashboard': 'budget',
+  'profitability-analysis': 'profitability',
+}
+
+// Reverse mapping: URL slug to project ID
+export const SLUG_TO_PROJECT_MAP: Record<string, string> = Object.entries(PROJECT_SLUG_MAP).reduce(
+  (acc, [projectId, slug]) => ({ ...acc, [slug]: projectId }),
+  {} as Record<string, string>
+)
+
+// Find category by slug
+export function getCategoryBySlug(slug: string): PortfolioCategory | undefined {
+  return PORTFOLIO_CATEGORIES.find(cat => cat.slug === slug)
+}
+
+// Find project ID by URL slug
+export function getProjectIdBySlug(slug: string): string | undefined {
+  return SLUG_TO_PROJECT_MAP[slug]
+}
+
+// Find category that contains a project
+export function getCategoryByProjectId(projectId: string): PortfolioCategory | undefined {
+  return PORTFOLIO_CATEGORIES.find(cat => cat.projectIds.includes(projectId))
+}

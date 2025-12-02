@@ -1,72 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
-import { PROJECTS } from '@/lib/utils'
-
-// Portfolio Gallery categories with project mappings
-type PortfolioCategory = {
-  id: string
-  slug: string
-  title: string
-  subtitle: string
-  description: string
-  image: string | null
-  accentColor: string
-  gradient: string
-  projectIds: string[]
-  mcpProjects?: boolean
-  showShowcase?: boolean
-}
-
-const PORTFOLIO_CATEGORIES: PortfolioCategory[] = [
-  {
-    id: 'sales-marketing',
-    slug: 'sales_marketing',
-    title: 'Sales & Marketing',
-    subtitle: 'E-Commerce & Brand Platforms',
-    description: 'Full-scale e-commerce solutions, luxury brand websites, and marketing-driven digital experiences.',
-    image: '/assets/projects/ecommerce/homepage.png',
-    accentColor: '#FF6B35',
-    gradient: 'from-orange-600/40 via-rose-600/20 to-transparent',
-    projectIds: ['ecommerce', 'hybrid', 'boutique'],
-    showShowcase: true,
-  },
-  {
-    id: 'finance',
-    slug: 'finance',
-    title: 'Finance',
-    subtitle: 'Financial Intelligence & Analytics',
-    description: 'P&L management systems, budget tracking dashboards, profitability analysis, and data-driven financial decision tools.',
-    image: '/assets/projects/budget-dashboard/homepage.png',
-    accentColor: '#4ECDC4',
-    gradient: 'from-emerald-600/40 via-teal-600/20 to-transparent',
-    projectIds: ['budget-dashboard', 'profitability-analysis'],
-  },
-  {
-    id: 'operations',
-    slug: 'operations',
-    title: 'Operations',
-    subtitle: 'Logistics & Supply Chain',
-    description: 'Real-time shipping calculators, container optimization, warehouse management, and end-to-end supply chain solutions.',
-    image: '/assets/projects/shipping/homepage.png',
-    accentColor: '#6366F1',
-    gradient: 'from-indigo-600/40 via-blue-600/20 to-transparent',
-    projectIds: ['shipping', 'logistics'],
-  },
-  {
-    id: 'agent',
-    slug: 'agent_ai',
-    title: 'Agent & AI',
-    subtitle: 'Intelligent Automation',
-    description: 'Custom AI agents, MCP server integrations, and smart rendering solutions powered by machine learning.',
-    image: '/assets/projects/ai-render/homepage.png',
-    accentColor: '#10B981',
-    gradient: 'from-emerald-600/40 via-green-600/20 to-transparent',
-    projectIds: ['ai-render'],
-    mcpProjects: true,
-  },
-]
+import { PROJECTS, PORTFOLIO_CATEGORIES, PROJECT_SLUG_MAP, getCategoryBySlug } from '@/lib/utils'
+import type { PortfolioCategory } from '@/lib/utils'
 
 // Showcase data for media presentation - ALL reels from presentation_marketing
 const SHOWCASE_ITEMS = [
@@ -240,6 +178,7 @@ function AutoRotateCarousel({
 }
 
 export default function GalleryPage() {
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState(0)
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
@@ -256,14 +195,38 @@ export default function GalleryPage() {
   const closingByPop = useRef(false)
   const categoryClosingByPop = useRef(false)
   const showcaseClosingByPop = useRef(false)
+  const initialLoadDone = useRef(false)
 
-  const projectHashMap: Record<string, string> = {
-    ecommerce: 'antoniolupi',
-    hybrid: 'luxury',
-    boutique: 'feelippos',
-    shipping: 'shippingapp',
-    'ai-render': 'smartrender',
-  }
+  // Read initial state from sessionStorage (set by category/project pages)
+  useEffect(() => {
+    if (initialLoadDone.current) return
+    initialLoadDone.current = true
+
+    const initialCategory = sessionStorage.getItem('initialCategory')
+    const initialProject = sessionStorage.getItem('initialProject')
+
+    // Clear the sessionStorage after reading
+    sessionStorage.removeItem('initialCategory')
+    sessionStorage.removeItem('initialProject')
+
+    if (initialCategory) {
+      const category = getCategoryBySlug(initialCategory)
+      if (category) {
+        setSelectedCategory(category.slug)
+        setCategorySectionIndex(0)
+
+        if (initialProject) {
+          // Find the project index within the category
+          const projectIndex = category.projectIds.indexOf(initialProject)
+          if (projectIndex >= 0) {
+            setSelectedProject(initialProject)
+            setProjectParentCategory(category.slug)
+            setCategorySectionIndex(projectIndex + 1)
+          }
+        }
+      }
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -428,7 +391,7 @@ export default function GalleryPage() {
     }
 
     window.addEventListener('popstate', handlePopState)
-    const projectSlug = projectHashMap[selectedProject] ?? selectedProject
+    const projectSlug = PROJECT_SLUG_MAP[selectedProject] ?? selectedProject
     // Build URL based on whether opened from category or directly
     const url = projectParentCategory
       ? `/${projectParentCategory}/${projectSlug}`
@@ -438,10 +401,15 @@ export default function GalleryPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState)
       if (!closingByPop.current) {
-        window.history.back()
+        // When closing project, go back to category or home
+        if (projectParentCategory) {
+          router.push(`/${projectParentCategory}`, { scroll: false })
+        } else {
+          router.push('/', { scroll: false })
+        }
       }
     }
-  }, [selectedProject, projectParentCategory])
+  }, [selectedProject, projectParentCategory, router])
 
   // Handle browser back button for Showcase modal
   useEffect(() => {
@@ -460,17 +428,20 @@ export default function GalleryPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState)
       if (!showcaseClosingByPop.current) {
-        window.history.back()
+        router.back()
       }
     }
-  }, [showShowcase])
+  }, [showShowcase, router])
 
   // Handle browser back button for Category modal
   useEffect(() => {
     if (!selectedCategory) return
 
     categoryClosingByPop.current = false
-    setCategorySectionIndex(0) // Reset to first section when opening
+    // Only reset section index if not coming from initial load with a project
+    if (!initialLoadDone.current || !sessionStorage.getItem('initialProject')) {
+      setCategorySectionIndex(0)
+    }
 
     const handlePopState = () => {
       categoryClosingByPop.current = true
@@ -478,7 +449,7 @@ export default function GalleryPage() {
     }
 
     // Find category to get slug for URL
-    const category = PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory)
+    const category = PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory || c.slug === selectedCategory)
     const slug = category?.slug ?? selectedCategory
 
     window.addEventListener('popstate', handlePopState)
@@ -487,13 +458,14 @@ export default function GalleryPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState)
       if (!categoryClosingByPop.current) {
-        window.history.back()
+        // When closing category, go back to home
+        router.push('/', { scroll: false })
       }
     }
-  }, [selectedCategory])
+  }, [selectedCategory, router])
 
-  // Get category data for modal
-  const currentCategory = selectedCategory ? PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory) : null
+  // Get category data for modal (handle both id and slug)
+  const currentCategory = selectedCategory ? PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory || c.slug === selectedCategory) : null
   const categoryProjects = currentCategory ? PROJECTS.filter(p => currentCategory.projectIds.includes(p.id)) : []
 
   // Handle scroll navigation for Category modal
