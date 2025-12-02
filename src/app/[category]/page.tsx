@@ -14,8 +14,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   // If invalid category, render homepage
   if (!categoryData) {
-    return <GalleryPage />
+    return <GalleryPage key="home" />
   }
 
-  return <GalleryPage initialCategory={category} />
+  return <GalleryPage key={category} initialCategory={category} />
 }
