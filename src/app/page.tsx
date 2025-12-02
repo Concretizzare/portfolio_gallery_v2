@@ -181,9 +181,10 @@ function AutoRotateCarousel({
 interface GalleryPageProps {
   initialCategory?: string | null
   initialProject?: string | null
+  initialShowcase?: boolean
 }
 
-export default function GalleryPage({ initialCategory = null, initialProject = null }: GalleryPageProps) {
+export default function GalleryPage({ initialCategory = null, initialProject = null, initialShowcase = false }: GalleryPageProps) {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState(0)
@@ -197,15 +198,17 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         return {
           selectedProject: initialProject,
           selectedCategory: category.slug,
-          projectParentCategory: category.slug,
-          categorySectionIndex: projectIndex >= 0 ? projectIndex + 1 : 0
+          projectParentCategory: category.id,
+          categorySectionIndex: projectIndex >= 0 ? projectIndex + 1 : 0,
+          showShowcase: false
         }
       } else if (category) {
         return {
           selectedProject: null,
-          selectedCategory: category.slug,
+          selectedCategory: initialShowcase ? null : category.slug,
           projectParentCategory: null,
-          categorySectionIndex: 0
+          categorySectionIndex: 0,
+          showShowcase: initialShowcase
         }
       }
     }
@@ -213,7 +216,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       selectedProject: null,
       selectedCategory: null,
       projectParentCategory: null,
-      categorySectionIndex: 0
+      categorySectionIndex: 0,
+      showShowcase: false
     }
   }
 
@@ -222,7 +226,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
   const [selectedProject, setSelectedProject] = useState<string | null>(initialState.selectedProject)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
-  const [showShowcase, setShowShowcase] = useState(false)
+  const [showShowcase, setShowShowcase] = useState(initialState.showShowcase)
   const [activeShowcaseItem, setActiveShowcaseItem] = useState(0)
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialState.selectedCategory)
@@ -386,99 +390,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
     }
   }, [sections.length, selectedProject, showShowcase])
 
-  useEffect(() => {
-    if (!selectedProject) return
-
-    closingByPop.current = false
-
-    const handlePopState = () => {
-      closingByPop.current = true
-      setSelectedProject(null)
-      setProjectParentCategory(null)
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    const projectSlug = PROJECT_SLUG_MAP[selectedProject] ?? selectedProject
-    // Build URL based on whether opened from category or directly
-    const url = projectParentCategory
-      ? `/${projectParentCategory}/${projectSlug}`
-      : `/${projectSlug}`
-
-    // Use replaceState on initial mount (URL already correct), pushState for user navigation
-    if (isInitialMount.current && initialProject) {
-      window.history.replaceState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
-    } else {
-      window.history.pushState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
-    }
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      if (!closingByPop.current) {
-        // When closing project, go back to category or home
-        if (projectParentCategory) {
-          router.push(`/${projectParentCategory}`, { scroll: false })
-        } else {
-          router.push('/', { scroll: false })
-        }
-      }
-    }
-  }, [selectedProject, projectParentCategory, router, initialProject])
-
-  // Handle browser back button for Showcase modal
-  useEffect(() => {
-    if (!showShowcase) return
-
-    showcaseClosingByPop.current = false
-
-    const handlePopState = () => {
-      showcaseClosingByPop.current = true
-      setShowShowcase(false)
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    window.history.pushState({ showcase: true }, '', '#showcase')
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      if (!showcaseClosingByPop.current) {
-        router.back()
-      }
-    }
-  }, [showShowcase, router])
-
-  // Handle browser back button for Category modal
-  useEffect(() => {
-    if (!selectedCategory) return
-
-    categoryClosingByPop.current = false
-
-    const handlePopState = () => {
-      categoryClosingByPop.current = true
-      setSelectedCategory(null)
-    }
-
-    // Find category to get slug for URL
-    const category = PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory || c.slug === selectedCategory)
-    const slug = category?.slug ?? selectedCategory
-
-    window.addEventListener('popstate', handlePopState)
-
-    // Use replaceState on initial mount (URL already correct), pushState for user navigation
-    if (isInitialMount.current && initialCategory) {
-      window.history.replaceState({ category: selectedCategory }, '', `/${slug}`)
-      isInitialMount.current = false
-    } else {
-      window.history.pushState({ category: selectedCategory }, '', `/${slug}`)
-    }
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      if (!categoryClosingByPop.current) {
-        // When closing category, go back to home
-        router.push('/', { scroll: false })
-      }
-    }
-  }, [selectedCategory, router, initialCategory])
+  // No manual URL management needed - Next.js handles routing via real pages
 
   // Get category data for modal (handle both id and slug)
   const currentCategory = selectedCategory ? PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory || c.slug === selectedCategory) : null
@@ -599,10 +511,17 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       >
         <button
           onClick={() => {
-            setSelectedCategory(null)
-            setSelectedProject(null)
-            setShowShowcase(false)
-            setActiveSection(0)
+            // Hierarchical navigation: project → category → home
+            if (selectedProject && projectParentCategory) {
+              const category = PORTFOLIO_CATEGORIES.find(c => c.id === projectParentCategory)
+              if (category) {
+                router.push(`/${category.slug}`)
+              } else {
+                router.push('/')
+              }
+            } else {
+              router.push('/')
+            }
           }}
           className="text-sm md:text-base text-[#6B6B70] hover:text-white transition-colors font-light"
         >
@@ -613,10 +532,19 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
             <button
               key={item}
               onClick={() => {
-                setSelectedCategory(null)
-                setSelectedProject(null)
-                setShowShowcase(false)
-                setActiveSection(item === 'Work' ? 0 : item === 'About' ? 1 : 2)
+                // Hierarchical navigation: project → category → home
+                if (selectedProject && projectParentCategory) {
+                  const category = PORTFOLIO_CATEGORIES.find(c => c.id === projectParentCategory)
+                  if (category) {
+                    router.push(`/${category.slug}`)
+                  } else {
+                    router.push('/')
+                  }
+                } else if (selectedCategory || showShowcase) {
+                  router.push('/')
+                } else {
+                  setActiveSection(item === 'Work' ? 0 : item === 'About' ? 1 : 2)
+                }
               }}
               className="text-sm md:text-base text-[#6B6B70] hover:text-white transition-colors font-light"
             >
@@ -738,7 +666,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                         if (!isActive) {
                           setActiveCarouselIndex(idx)
                         } else if (category.projectIds.length > 0 || category.mcpProjects) {
-                          setSelectedCategory(category.id)
+                          router.push(`/${category.slug}`)
                         }
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
@@ -1320,7 +1248,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
           >
             {/* Close Button */}
             <button
-              onClick={() => setShowShowcase(false)}
+              onClick={() => router.push('/sales_marketing')}
               className="fixed top-6 right-6 z-20 text-[#6B6B70] hover:text-white transition-colors flex items-center gap-2"
             >
               <span className="text-sm">Close</span>
@@ -1532,8 +1460,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
               </p>
               <button
                 onClick={() => {
-                  setShowShowcase(false)
-                  setActiveSection(sections.length - 1)
+                  router.push('/')
                 }}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-[#E8E4DF] text-[#0A0A0B] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
               >
@@ -1732,13 +1659,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                         onClick={(e) => {
                           e.stopPropagation()
                           const categorySlug = currentCategory.slug
-                          const projectId = proj.id
-                          setSelectedCategory(null)
-                          // Use setTimeout to ensure category closes first
-                          setTimeout(() => {
-                            setProjectParentCategory(categorySlug)
-                            setSelectedProject(projectId)
-                          }, 50)
+                          const projectSlug = PROJECT_SLUG_MAP[proj.id] ?? proj.id
+                          router.push(`/${categorySlug}/${projectSlug}`)
                         }}
                         className="inline-flex items-center gap-2 text-sm hover:gap-4 transition-all"
                         style={{ color: currentCategory.accentColor }}
@@ -1761,13 +1683,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                       onClick={(e) => {
                         e.stopPropagation()
                         const categorySlug = currentCategory.slug
-                        const projectId = proj.id
-                        setSelectedCategory(null)
-                        // Use setTimeout to ensure category closes first
-                        setTimeout(() => {
-                          setProjectParentCategory(categorySlug)
-                          setSelectedProject(projectId)
-                        }, 50)
+                        const projectSlug = PROJECT_SLUG_MAP[proj.id] ?? proj.id
+                        router.push(`/${categorySlug}/${projectSlug}`)
                       }}
                     >
                       <div
@@ -1989,10 +1906,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.7 }}
                       onClick={() => {
-                        setSelectedCategory(null)
-                        setTimeout(() => {
-                          setShowShowcase(true)
-                        }, 50)
+                        router.push('/sales_marketing/visual-excellence')
                       }}
                       className="inline-flex items-center gap-3 px-8 py-4 rounded-lg font-medium text-sm hover:opacity-90 transition-all hover:gap-4"
                       style={{ backgroundColor: currentCategory.accentColor, color: '#0A0A0B' }}

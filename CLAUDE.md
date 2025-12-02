@@ -74,17 +74,18 @@ Critical detection logic in `page.tsx`:
 Path-based routing with dynamic Next.js App Router routes:
 
 ```
-/                           # Homepage with category carousel
-/sales_marketing            # Sales & Marketing category page
-/sales_marketing/antoniolupi # Antonio Lupi project modal
-/agent_ai                   # Agent & AI category page
-/agent_ai/smartrender       # Smart Render project modal
+/                                    # Homepage with category carousel
+/sales_marketing                     # Sales & Marketing category page
+/sales_marketing/antoniolupi         # Antonio Lupi project page
+/sales_marketing/visual-excellence   # Visual Excellence showcase page
+/agent_ai                            # Agent & AI category page
+/agent_ai/smartrender                # Smart Render project page
 ```
 
 **Route structure:**
-- `src/app/page.tsx` - Main homepage
-- `src/app/[category]/page.tsx` - Category pages (dynamic)
-- `src/app/[category]/[project]/page.tsx` - Project pages (dynamic)
+- `src/app/page.tsx` - Main homepage (also handles category, project, and showcase rendering)
+- `src/app/[category]/page.tsx` - Category pages (dynamic, renders GalleryPage with props)
+- `src/app/[category]/[project]/page.tsx` - Project and showcase pages (dynamic, handles `visual-excellence` as special case)
 
 **Project slug mapping** (defined in `src/lib/utils.ts`):
 ```typescript
@@ -97,9 +98,11 @@ const PROJECT_SLUG_MAP = {
 ```
 
 **Navigation behavior:**
-- Direct URL access: Opens category/project directly
-- Back from project → Returns to category page
-- Back from category → Returns to homepage (reset to beginning)
+- Direct URL access: Opens category/project/showcase directly
+- Back/close from project → Returns to category page via `router.push()`
+- Back/close from showcase → Returns to Sales & Marketing category page
+- Back/close from category → Returns to homepage (reset to beginning)
+- Hierarchical navigation: Header buttons navigate up one level (project→category→home)
 
 ### 3D Layer (`src/components/3d/`)
 

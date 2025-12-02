@@ -11,12 +11,18 @@ interface ProjectPageProps {
 export default function ProjectPage({ params }: ProjectPageProps) {
   const { category, project } = use(params)
   const categoryData = getCategoryBySlug(category)
-  const projectId = getProjectIdBySlug(project)
 
   // If invalid category, render homepage
   if (!categoryData) {
     return <GalleryPage />
   }
+
+  // Handle Visual Excellence showcase (special case for Sales & Marketing)
+  if (project === 'visual-excellence' && category === 'sales_marketing') {
+    return <GalleryPage initialCategory={category} initialShowcase={true} />
+  }
+
+  const projectId = getProjectIdBySlug(project)
 
   // If invalid project, render category page
   if (!projectId) {
