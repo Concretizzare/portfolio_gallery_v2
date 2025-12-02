@@ -503,6 +503,8 @@ export default function GalleryPage() {
     let scrollTimeout: NodeJS.Timeout
     let touchpadDelta = 0
     let touchpadTimeout: NodeJS.Timeout
+    let touchStartY = 0
+    let touchStartTime = 0
 
     const totalSections = categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 3 : 2)
 
@@ -540,10 +542,45 @@ export default function GalleryPage() {
       }
     }
 
+    // Touch event handlers for mobile swipe
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+      touchStartTime = Date.now()
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isScrolling) return
+
+      const touchEndY = e.changedTouches[0].clientY
+      const deltaY = touchStartY - touchEndY
+      const deltaTime = Date.now() - touchStartTime
+
+      // Minimum swipe distance (50px) and maximum time (500ms)
+      if (Math.abs(deltaY) > 50 && deltaTime < 500) {
+        isScrolling = true
+
+        if (deltaY > 0 && categorySectionIndex < totalSections - 1) {
+          // Swipe up - next section
+          setCategorySectionIndex(prev => prev + 1)
+        } else if (deltaY < 0 && categorySectionIndex > 0) {
+          // Swipe down - previous section
+          setCategorySectionIndex(prev => prev - 1)
+        }
+
+        scrollTimeout = setTimeout(() => {
+          isScrolling = false
+        }, 800)
+      }
+    }
+
     window.addEventListener('wheel', handleWheel, { passive: false })
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd, { passive: true })
 
     return () => {
       window.removeEventListener('wheel', handleWheel)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
       clearTimeout(scrollTimeout)
       clearTimeout(touchpadTimeout)
     }
@@ -678,7 +715,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full aspect-[16/8] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full aspect-[9/14] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -690,10 +727,10 @@ export default function GalleryPage() {
                           : '0 20px 40px -15px rgba(0,0,0,0.6)',
                       }}
                     >
-                      {/* Card Layout: Image Left + Content Right */}
-                      <div className="flex h-full">
-                        {/* Left - Image placeholder (45%) with 16:9 container */}
-                        <div className="relative w-[45%] h-full overflow-hidden">
+                      {/* Card Layout: Vertical on mobile, Horizontal on desktop */}
+                      <div className="flex flex-col md:flex-row h-full">
+                        {/* Top/Left - Video (50% height on mobile, 45% width on desktop) */}
+                        <div className="relative w-full h-[50%] md:w-[45%] md:h-full overflow-hidden">
                           {category.id === 'sales-marketing' ? (
                             /* Sales & Marketing: Camera movement video */
                             <video
@@ -782,11 +819,11 @@ export default function GalleryPage() {
                           />
                         </div>
 
-                        {/* Right - Content (55%) */}
-                        <div className="flex-1 flex flex-col justify-center p-6 md:p-10 lg:p-12">
+                        {/* Bottom/Right - Content (50% height on mobile, 55% width on desktop) */}
+                        <div className="flex-1 flex flex-col justify-center p-4 sm:p-6 md:p-10 lg:p-12">
                           {/* Title */}
                           <motion.h2
-                            className="text-2xl md:text-4xl lg:text-5xl font-light text-white mb-4 md:mb-5 tracking-tight"
+                            className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-2 sm:mb-4 md:mb-5 tracking-tight"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: isActive ? 1 : 0.6, y: 0 }}
                             transition={{ delay: 0.15 }}
@@ -796,7 +833,7 @@ export default function GalleryPage() {
 
                           {/* Subtitle */}
                           <motion.p
-                            className="text-sm md:text-lg font-medium mb-4"
+                            className="text-xs sm:text-sm md:text-lg font-medium mb-2 sm:mb-4"
                             style={{ color: category.accentColor }}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: isActive ? 1 : 0.5 }}
@@ -807,7 +844,7 @@ export default function GalleryPage() {
 
                           {/* Description */}
                           <motion.p
-                            className="text-[#71717a] text-sm md:text-base leading-relaxed mb-6 max-w-md"
+                            className="text-[#71717a] text-xs sm:text-sm md:text-base leading-relaxed mb-3 sm:mb-6 max-w-md line-clamp-2 sm:line-clamp-none"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: isActive ? 1 : 0.4 }}
                             transition={{ delay: 0.25 }}

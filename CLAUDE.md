@@ -199,6 +199,7 @@ CONTACT_EMAIL=your-inbox@example.com
 
 ## Deployment
 
-- **Current workflow**: Local development only, no Vercel deployment
-- Commit changes to GitHub: `https://github.com/Concretizzare/portfolio_gallery_v2.git`
-- Run server locally with `npm run dev`
+- **Workflow**: Deploy via Vercel (connected to GitHub)
+- **Always commit and push** to GitHub after changes: `https://github.com/Concretizzare/portfolio_gallery_v2.git`
+- **No local-only work**: All changes must be committed and pushed to trigger Vercel deployment
+- Development server: `npm run dev` (localhost:3000)
