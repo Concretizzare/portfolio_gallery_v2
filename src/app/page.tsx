@@ -1887,7 +1887,7 @@ export default function GalleryPage() {
                             return (
                               <div key={item.id} className="w-full flex-shrink-0 px-2">
                                 <div
-                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] h-[70svh]"
+                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] h-[55svh]"
                                 >
                                   {videoSrc ? (
                                     <video
