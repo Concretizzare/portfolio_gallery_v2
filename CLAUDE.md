@@ -69,17 +69,37 @@ Critical detection logic in `page.tsx`:
 - **Touchpad**: `deltaY < 50`, accumulates until threshold (250) reached
 - Scroll locked during transitions via `isTransitioning` state
 
-### Project Modal & URL Routing
+### URL Routing
 
-Hash-based routing for project modals:
+Path-based routing with dynamic Next.js App Router routes:
+
+```
+/                           # Homepage with category carousel
+/sales_marketing            # Sales & Marketing category page
+/sales_marketing/antoniolupi # Antonio Lupi project modal
+/agent_ai                   # Agent & AI category page
+/agent_ai/smartrender       # Smart Render project modal
+```
+
+**Route structure:**
+- `src/app/page.tsx` - Main homepage
+- `src/app/[category]/page.tsx` - Category pages (dynamic)
+- `src/app/[category]/[project]/page.tsx` - Project pages (dynamic)
+
+**Project slug mapping** (defined in `src/lib/utils.ts`):
 ```typescript
-const projectHashMap = {
+const PROJECT_SLUG_MAP = {
   ecommerce: 'antoniolupi', hybrid: 'luxury', boutique: 'feelippos',
-  shipping: 'shippingapp', 'ai-render': 'smartrender'
+  shipping: 'shippingapp', 'ai-render': 'smartrender',
+  logistics: 'logistics', 'budget-dashboard': 'budget',
+  'profitability-analysis': 'profitability'
 }
 ```
-- Opening project: `pushState` with `#hashname`
-- Back button: `popstate` listener closes modal
+
+**Navigation behavior:**
+- Direct URL access: Opens category/project directly
+- Back from project → Returns to category page
+- Back from category → Returns to homepage (reset to beginning)
 
 ### 3D Layer (`src/components/3d/`)
 
