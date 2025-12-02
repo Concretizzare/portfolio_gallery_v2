@@ -846,7 +846,7 @@ export default function GalleryPage() {
                         </div>
 
                         {/* Bottom/Right - Content (50% height on mobile, 55% width on desktop) */}
-                        <div className="flex-1 flex flex-col justify-center p-4 sm:p-6 md:p-10 lg:p-12">
+                        <div className="flex-1 flex flex-col justify-center px-4 pt-2 pb-4 sm:p-6 md:p-10 lg:p-12">
                           {/* Title */}
                           <motion.h2
                             className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-2 sm:mb-4 md:mb-5 tracking-tight"
@@ -2113,7 +2113,7 @@ export default function GalleryPage() {
 
       {/* Progress Bar - Hidden when project or category is open */}
       <div
-        className={`fixed left-4 right-4 bottom-3 sm:left-6 sm:right-6 sm:bottom-4 md:bottom-6 h-px bg-[#2a2a2d] ${selectedProject || selectedCategory ? 'invisible' : ''}`}
+        className={`fixed left-4 right-4 bottom-3 sm:left-6 sm:right-6 sm:bottom-4 md:bottom-6 h-px bg-[#2a2a2d] z-[5] ${selectedProject || selectedCategory ? 'invisible' : ''}`}
         style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <motion.div
