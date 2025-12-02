@@ -726,7 +726,7 @@ export default function GalleryPage() {
                     }}
                     style={{
                       transformStyle: 'preserve-3d',
-                      zIndex: 10 - Math.abs(offset),
+                      zIndex: 50 - Math.abs(offset),
                       pointerEvents: isActive ? 'auto' : 'none'
                     }}
                   >
@@ -846,7 +846,7 @@ export default function GalleryPage() {
                         </div>
 
                         {/* Bottom/Right - Content (50% height on mobile, 55% width on desktop) */}
-                        <div className="flex-1 flex flex-col justify-center px-4 pt-2 pb-4 sm:p-6 md:p-10 lg:p-12">
+                        <div className="flex-1 flex flex-col justify-center px-4 pt-0 pb-4 sm:p-6 md:p-10 lg:p-12">
                           {/* Title */}
                           <motion.h2
                             className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-2 sm:mb-4 md:mb-5 tracking-tight"
