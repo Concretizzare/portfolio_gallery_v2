@@ -741,7 +741,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full h-[70svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full h-[62svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -849,7 +849,7 @@ export default function GalleryPage() {
                         <div className="flex-1 flex flex-col justify-start md:justify-center px-4 pt-6 pb-4 sm:p-6 md:p-10 lg:p-12">
                           {/* Title */}
                           <motion.h2
-                            className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-2 sm:mb-4 md:mb-5 tracking-tight"
+                            className="text-2xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-white mb-3 sm:mb-4 md:mb-5 tracking-tight"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: isActive ? 1 : 0.6, y: 0 }}
                             transition={{ delay: 0.15 }}
@@ -859,7 +859,7 @@ export default function GalleryPage() {
 
                           {/* Subtitle */}
                           <motion.p
-                            className="text-xs sm:text-sm md:text-lg font-medium mb-2 sm:mb-4"
+                            className="text-sm sm:text-sm md:text-lg font-medium mb-3 sm:mb-4"
                             style={{ color: category.accentColor }}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: isActive ? 1 : 0.5 }}
@@ -870,7 +870,7 @@ export default function GalleryPage() {
 
                           {/* Description */}
                           <motion.p
-                            className="text-[#71717a] text-xs sm:text-sm md:text-base leading-relaxed mb-3 sm:mb-6 max-w-md line-clamp-2 sm:line-clamp-none"
+                            className="text-[#71717a] text-sm sm:text-sm md:text-base leading-relaxed mb-4 sm:mb-6 max-w-md line-clamp-3 sm:line-clamp-none"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: isActive ? 1 : 0.4 }}
                             transition={{ delay: 0.25 }}
