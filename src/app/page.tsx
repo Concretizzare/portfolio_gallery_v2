@@ -239,6 +239,16 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
   const showcaseClosingByPop = useRef(false)
   const isInitialMount = useRef(true)
 
+  // Sync state with props when they change (for navigation between routes)
+  useEffect(() => {
+    const newState = computeInitialState()
+    setSelectedProject(newState.selectedProject)
+    setSelectedCategory(newState.selectedCategory)
+    setProjectParentCategory(newState.projectParentCategory)
+    setCategorySectionIndex(newState.categorySectionIndex)
+    setShowShowcase(newState.showShowcase)
+  }, [initialCategory, initialProject, initialShowcase])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormStatus('sending')
