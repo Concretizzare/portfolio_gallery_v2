@@ -197,7 +197,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         const projectIndex = category.projectIds.indexOf(initialProject)
         return {
           selectedProject: initialProject,
-          selectedCategory: category.slug,
+          selectedCategory: null,  // Don't show category page when project is open
           projectParentCategory: category.id,
           categorySectionIndex: projectIndex >= 0 ? projectIndex + 1 : 0,
           showShowcase: false
