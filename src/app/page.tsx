@@ -1839,7 +1839,7 @@ export default function GalleryPage() {
                     </p>
 
                     {/* Preview Cards */}
-                    <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
                       {SHOWCASE_ITEMS.slice(0, 3).map((item, i) => {
                         const videoSrc = item.generated.find(g => g.type === 'video')?.src
                         const isPlaying = playingPreviewReel === item.id
@@ -1854,7 +1854,7 @@ export default function GalleryPage() {
                                 setPlayingPreviewReel(isPlaying ? null : item.id)
                               }
                             }}
-                            className="relative group rounded-lg md:rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square cursor-pointer"
+                            className="relative group rounded-lg md:rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-video md:aspect-square cursor-pointer"
                           >
                             {isPlaying && videoSrc ? (
                               <video
@@ -1904,8 +1904,10 @@ export default function GalleryPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.7 }}
                       onClick={() => {
-                        setShowShowcase(true)
                         setSelectedCategory(null)
+                        setTimeout(() => {
+                          setShowShowcase(true)
+                        }, 50)
                       }}
                       className="inline-flex items-center gap-3 px-8 py-4 rounded-lg font-medium text-sm hover:opacity-90 transition-all hover:gap-4"
                       style={{ backgroundColor: currentCategory.accentColor, color: '#0A0A0B' }}
