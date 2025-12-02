@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { use } from 'react'
+import GalleryPage from '../../page'
 import { getCategoryBySlug, getProjectIdBySlug } from '@/lib/utils'
 
 interface ProjectPageProps {
@@ -9,37 +9,19 @@ interface ProjectPageProps {
 }
 
 export default function ProjectPage({ params }: ProjectPageProps) {
-  const router = useRouter()
+  const { category, project } = use(params)
+  const categoryData = getCategoryBySlug(category)
+  const projectId = getProjectIdBySlug(project)
 
-  useEffect(() => {
-    const loadProject = async () => {
-      const { category, project } = await params
-      const categoryData = getCategoryBySlug(category)
-      const projectId = getProjectIdBySlug(project)
+  // If invalid category, render homepage
+  if (!categoryData) {
+    return <GalleryPage />
+  }
 
-      if (categoryData && projectId) {
-        // Store the initial state in sessionStorage and redirect to homepage
-        sessionStorage.setItem('initialCategory', category)
-        sessionStorage.setItem('initialProject', projectId)
-        router.replace('/')
-      } else if (categoryData) {
-        // Valid category but invalid project, go to category page
-        sessionStorage.setItem('initialCategory', category)
-        sessionStorage.removeItem('initialProject')
-        router.replace('/')
-      } else {
-        // Invalid category, redirect to homepage
-        router.replace('/')
-      }
-    }
+  // If invalid project, render category page
+  if (!projectId) {
+    return <GalleryPage initialCategory={category} />
+  }
 
-    loadProject()
-  }, [params, router])
-
-  // Show loading state while redirecting
-  return (
-    <div className="h-screen w-screen bg-[#0A0A0B] flex items-center justify-center">
-      <div className="animate-pulse text-[#6B6B70]">Loading...</div>
-    </div>
-  )
+  return <GalleryPage initialCategory={category} initialProject={projectId} />
 }

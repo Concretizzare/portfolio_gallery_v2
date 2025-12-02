@@ -177,56 +177,63 @@ function AutoRotateCarousel({
   return null
 }
 
-export default function GalleryPage() {
+// Props interface for GalleryPage
+interface GalleryPageProps {
+  initialCategory?: string | null
+  initialProject?: string | null
+}
+
+export default function GalleryPage({ initialCategory = null, initialProject = null }: GalleryPageProps) {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState(0)
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
+
+  // Compute initial state from props
+  const computeInitialState = () => {
+    if (initialCategory) {
+      const category = getCategoryBySlug(initialCategory)
+      if (category && initialProject) {
+        const projectIndex = category.projectIds.indexOf(initialProject)
+        return {
+          selectedProject: initialProject,
+          selectedCategory: category.slug,
+          projectParentCategory: category.slug,
+          categorySectionIndex: projectIndex >= 0 ? projectIndex + 1 : 0
+        }
+      } else if (category) {
+        return {
+          selectedProject: null,
+          selectedCategory: category.slug,
+          projectParentCategory: null,
+          categorySectionIndex: 0
+        }
+      }
+    }
+    return {
+      selectedProject: null,
+      selectedCategory: null,
+      projectParentCategory: null,
+      categorySectionIndex: 0
+    }
+  }
+
+  const initialState = computeInitialState()
+
+  const [selectedProject, setSelectedProject] = useState<string | null>(initialState.selectedProject)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [showShowcase, setShowShowcase] = useState(false)
   const [activeShowcaseItem, setActiveShowcaseItem] = useState(0)
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0)
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [categorySectionIndex, setCategorySectionIndex] = useState(0)
-  const [projectParentCategory, setProjectParentCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialState.selectedCategory)
+  const [categorySectionIndex, setCategorySectionIndex] = useState(initialState.categorySectionIndex)
+  const [projectParentCategory, setProjectParentCategory] = useState<string | null>(initialState.projectParentCategory)
   const [playingPreviewReel, setPlayingPreviewReel] = useState<string | null>(null)
   const [showcasePreviewIndex, setShowcasePreviewIndex] = useState(0)
   const closingByPop = useRef(false)
   const categoryClosingByPop = useRef(false)
   const showcaseClosingByPop = useRef(false)
-  const initialLoadDone = useRef(false)
-
-  // Read initial state from sessionStorage (set by category/project pages)
-  useEffect(() => {
-    if (initialLoadDone.current) return
-    initialLoadDone.current = true
-
-    const initialCategory = sessionStorage.getItem('initialCategory')
-    const initialProject = sessionStorage.getItem('initialProject')
-
-    // Clear the sessionStorage after reading
-    sessionStorage.removeItem('initialCategory')
-    sessionStorage.removeItem('initialProject')
-
-    if (initialCategory) {
-      const category = getCategoryBySlug(initialCategory)
-      if (category) {
-        setSelectedCategory(category.slug)
-        setCategorySectionIndex(0)
-
-        if (initialProject) {
-          // Find the project index within the category
-          const projectIndex = category.projectIds.indexOf(initialProject)
-          if (projectIndex >= 0) {
-            setSelectedProject(initialProject)
-            setProjectParentCategory(category.slug)
-            setCategorySectionIndex(projectIndex + 1)
-          }
-        }
-      }
-    }
-  }, [])
+  const isInitialMount = useRef(true)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -396,7 +403,13 @@ export default function GalleryPage() {
     const url = projectParentCategory
       ? `/${projectParentCategory}/${projectSlug}`
       : `/${projectSlug}`
-    window.history.pushState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
+
+    // Use replaceState on initial mount (URL already correct), pushState for user navigation
+    if (isInitialMount.current && initialProject) {
+      window.history.replaceState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
+    } else {
+      window.history.pushState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
+    }
 
     return () => {
       window.removeEventListener('popstate', handlePopState)
@@ -409,7 +422,7 @@ export default function GalleryPage() {
         }
       }
     }
-  }, [selectedProject, projectParentCategory, router])
+  }, [selectedProject, projectParentCategory, router, initialProject])
 
   // Handle browser back button for Showcase modal
   useEffect(() => {
@@ -438,10 +451,6 @@ export default function GalleryPage() {
     if (!selectedCategory) return
 
     categoryClosingByPop.current = false
-    // Only reset section index if not coming from initial load with a project
-    if (!initialLoadDone.current || !sessionStorage.getItem('initialProject')) {
-      setCategorySectionIndex(0)
-    }
 
     const handlePopState = () => {
       categoryClosingByPop.current = true
@@ -453,7 +462,14 @@ export default function GalleryPage() {
     const slug = category?.slug ?? selectedCategory
 
     window.addEventListener('popstate', handlePopState)
-    window.history.pushState({ category: selectedCategory }, '', `/${slug}`)
+
+    // Use replaceState on initial mount (URL already correct), pushState for user navigation
+    if (isInitialMount.current && initialCategory) {
+      window.history.replaceState({ category: selectedCategory }, '', `/${slug}`)
+      isInitialMount.current = false
+    } else {
+      window.history.pushState({ category: selectedCategory }, '', `/${slug}`)
+    }
 
     return () => {
       window.removeEventListener('popstate', handlePopState)
@@ -462,7 +478,7 @@ export default function GalleryPage() {
         router.push('/', { scroll: false })
       }
     }
-  }, [selectedCategory, router])
+  }, [selectedCategory, router, initialCategory])
 
   // Get category data for modal (handle both id and slug)
   const currentCategory = selectedCategory ? PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory || c.slug === selectedCategory) : null
