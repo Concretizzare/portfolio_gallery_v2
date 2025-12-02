@@ -675,8 +675,34 @@ export default function GalleryPage() {
             {/* Cards - vertically centered */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-16">
 
-              {/* Carousel Container */}
-              <div className="relative flex items-center justify-center px-4 md:px-12 lg:px-20 w-full" style={{ perspective: '1500px' }}>
+              {/* Carousel Container with swipe support */}
+              <div
+                className="relative flex items-center justify-center px-4 md:px-12 lg:px-20 w-full"
+                style={{ perspective: '1500px' }}
+                onTouchStart={(e) => {
+                  const touch = e.touches[0]
+                  e.currentTarget.dataset.touchStartX = String(touch.clientX)
+                  e.currentTarget.dataset.touchStartTime = String(Date.now())
+                }}
+                onTouchEnd={(e) => {
+                  const startX = parseFloat(e.currentTarget.dataset.touchStartX || '0')
+                  const startTime = parseFloat(e.currentTarget.dataset.touchStartTime || '0')
+                  const endX = e.changedTouches[0].clientX
+                  const deltaX = startX - endX
+                  const deltaTime = Date.now() - startTime
+
+                  // Minimum swipe distance (60px) and maximum time (400ms)
+                  if (Math.abs(deltaX) > 60 && deltaTime < 400) {
+                    if (deltaX > 0) {
+                      // Swipe left - next card
+                      setActiveCarouselIndex(prev => prev === PORTFOLIO_CATEGORIES.length - 1 ? 0 : prev + 1)
+                    } else {
+                      // Swipe right - previous card
+                      setActiveCarouselIndex(prev => prev === 0 ? PORTFOLIO_CATEGORIES.length - 1 : prev - 1)
+                    }
+                  }
+                }}
+              >
               {PORTFOLIO_CATEGORIES.map((category, idx) => {
                 const offset = idx - activeCarouselIndex
                 const isActive = offset === 0
@@ -715,7 +741,7 @@ export default function GalleryPage() {
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full aspect-[9/14] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full aspect-[3/4] sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -729,8 +755,8 @@ export default function GalleryPage() {
                     >
                       {/* Card Layout: Vertical on mobile, Horizontal on desktop */}
                       <div className="flex flex-col md:flex-row h-full">
-                        {/* Top/Left - Video (50% height on mobile, 45% width on desktop) */}
-                        <div className="relative w-full h-[50%] md:w-[45%] md:h-full overflow-hidden">
+                        {/* Top/Left - Video (38% height on mobile, 45% width on desktop) */}
+                        <div className="relative w-full h-[38%] md:w-[45%] md:h-full overflow-hidden">
                           {category.id === 'sales-marketing' ? (
                             /* Sales & Marketing: Camera movement video */
                             <video
@@ -901,10 +927,10 @@ export default function GalleryPage() {
                 )
               })}
 
-              {/* Navigation Arrows */}
+              {/* Navigation Arrows - Hidden on mobile */}
               <button
                 onClick={() => setActiveCarouselIndex(prev => prev === 0 ? PORTFOLIO_CATEGORIES.length - 1 : prev - 1)}
-                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full hidden md:flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 style={{
                   background: 'rgba(17,17,19,0.95)',
                   backdropFilter: 'blur(10px)',
@@ -917,7 +943,7 @@ export default function GalleryPage() {
               </button>
               <button
                 onClick={() => setActiveCarouselIndex(prev => prev === PORTFOLIO_CATEGORIES.length - 1 ? 0 : prev + 1)}
-                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full hidden md:flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 style={{
                   background: 'rgba(17,17,19,0.95)',
                   backdropFilter: 'blur(10px)',
@@ -1701,11 +1727,16 @@ export default function GalleryPage() {
                       </div>
 
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
                           const categorySlug = currentCategory.slug
-                          setProjectParentCategory(categorySlug)
-                          setSelectedProject(proj.id)
+                          const projectId = proj.id
                           setSelectedCategory(null)
+                          // Use setTimeout to ensure category closes first
+                          setTimeout(() => {
+                            setProjectParentCategory(categorySlug)
+                            setSelectedProject(projectId)
+                          }, 50)
                         }}
                         className="inline-flex items-center gap-2 text-sm hover:gap-4 transition-all"
                         style={{ color: currentCategory.accentColor }}
@@ -1725,11 +1756,16 @@ export default function GalleryPage() {
                       transition={{ duration: 0.8, delay: 0.2 }}
                       className="relative cursor-pointer order-1 lg:order-2"
                       style={{ perspective: '1000px' }}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         const categorySlug = currentCategory.slug
-                        setProjectParentCategory(categorySlug)
-                        setSelectedProject(proj.id)
+                        const projectId = proj.id
                         setSelectedCategory(null)
+                        // Use setTimeout to ensure category closes first
+                        setTimeout(() => {
+                          setProjectParentCategory(categorySlug)
+                          setSelectedProject(projectId)
+                        }, 50)
                       }}
                     >
                       <div
