@@ -681,7 +681,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                       }}
                       whileHover={isActive ? { scale: 1.01 } : {}}
                       whileTap={isActive ? { scale: 0.99 } : {}}
-                      className={`relative w-full h-[62svh] landscape:h-auto landscape:aspect-[16/9] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                      className={`relative w-full h-[62svh] sm:h-auto sm:aspect-[16/10] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
                         isActive && (category.projectIds.length > 0 || category.mcpProjects)
                           ? 'cursor-pointer'
                           : 'cursor-default'
@@ -1026,8 +1026,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                 {/* Header */}
                 <div className="flex items-start justify-between mb-12">
                   <div>
-                    <h1 className="text-3xl landscape:text-2xl sm:text-4xl md:text-5xl font-light mb-4">{project.title}</h1>
-                    <p className="text-[#A1A1A6] text-lg landscape:text-base sm:text-xl">{project.subtitle}</p>
+                    <h1 className="text-5xl font-light mb-4">{project.title}</h1>
+                    <p className="text-[#A1A1A6] text-xl">{project.subtitle}</p>
                   </div>
                   {project.url && (
                     <a
@@ -1492,7 +1492,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] bg-[#0A0A0B] overflow-hidden landscape:overflow-auto"
+            className="fixed inset-0 z-[100] bg-[#0A0A0B] overflow-hidden"
           >
             {/* Navigation Dots - Hidden */}
             <div className="hidden fixed right-6 top-1/2 -translate-y-1/2 z-20 flex-col gap-2">
@@ -1596,7 +1596,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.8 }}
-                  className="text-4xl landscape:text-3xl md:text-6xl lg:text-8xl font-light tracking-tight mb-6"
+                  className="text-4xl md:text-6xl lg:text-8xl font-light tracking-tight mb-6"
                 >
                   {currentCategory.title}
                 </motion.h1>
@@ -1803,7 +1803,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
                             return (
                               <div key={item.id} className="w-full flex-shrink-0 px-2">
                                 <div
-                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] h-[55svh] landscape:h-auto landscape:aspect-video"
+                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] h-[55svh]"
                                 >
                                   {videoSrc ? (
                                     <video
