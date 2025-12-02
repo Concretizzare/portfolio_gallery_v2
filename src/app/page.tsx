@@ -1853,7 +1853,29 @@ export default function GalleryPage() {
 
                     {/* Preview Cards - Carousel on mobile, Grid on desktop */}
                     {/* Mobile Carousel */}
-                    <div className="md:hidden relative mb-6">
+                    <div
+                      className="md:hidden relative mb-6"
+                      onTouchStart={(e) => {
+                        const touch = e.touches[0]
+                        e.currentTarget.dataset.touchStartX = String(touch.clientX)
+                        e.currentTarget.dataset.touchStartTime = String(Date.now())
+                      }}
+                      onTouchEnd={(e) => {
+                        const startX = parseFloat(e.currentTarget.dataset.touchStartX || '0')
+                        const startTime = parseFloat(e.currentTarget.dataset.touchStartTime || '0')
+                        const endX = e.changedTouches[0].clientX
+                        const deltaX = startX - endX
+                        const deltaTime = Date.now() - startTime
+
+                        if (Math.abs(deltaX) > 50 && deltaTime < 500) {
+                          if (deltaX > 0 && showcasePreviewIndex < 2) {
+                            setShowcasePreviewIndex(prev => prev + 1)
+                          } else if (deltaX < 0 && showcasePreviewIndex > 0) {
+                            setShowcasePreviewIndex(prev => prev - 1)
+                          }
+                        }
+                      }}
+                    >
                       <div className="overflow-hidden">
                         <motion.div
                           className="flex"
@@ -1865,7 +1887,7 @@ export default function GalleryPage() {
                             return (
                               <div key={item.id} className="w-full flex-shrink-0 px-2">
                                 <div
-                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-video"
+                                  className="relative rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] h-[70svh]"
                                 >
                                   {videoSrc ? (
                                     <video
@@ -1886,9 +1908,9 @@ export default function GalleryPage() {
                                     />
                                   )}
                                   <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
-                                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                                    <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
-                                    <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
+                                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                                    <h4 className="text-base font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
+                                    <p className="text-sm text-[#6B6B70] line-clamp-2">{item.description}</p>
                                   </div>
                                 </div>
                               </div>
