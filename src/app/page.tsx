@@ -4,69 +4,67 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { PROJECTS } from '@/lib/utils'
 
-// Services data for the 4-card section
-const SERVICES = [
+// Portfolio Gallery categories with project mappings
+type PortfolioCategory = {
+  id: string
+  slug: string
+  title: string
+  subtitle: string
+  description: string
+  image: string | null
+  accentColor: string
+  gradient: string
+  projectIds: string[]
+  mcpProjects?: boolean
+  showShowcase?: boolean
+}
+
+const PORTFOLIO_CATEGORIES: PortfolioCategory[] = [
   {
     id: 'sales-marketing',
+    slug: 'sales_marketing',
     title: 'Sales & Marketing',
-    subtitle: 'Drive Revenue Growth',
-    description: 'E-commerce platforms, marketing automation, and AI-powered media generation for maximum market impact.',
-    items: ['E-commerce Development', 'Marketing Automation', 'AI Media Generation', 'Brand Strategy'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
-    ),
-    gradient: 'from-rose-500/20 via-orange-500/10 to-transparent',
+    subtitle: 'E-Commerce & Brand Platforms',
+    description: 'Full-scale e-commerce solutions, luxury brand websites, and marketing-driven digital experiences.',
+    image: '/assets/projects/ecommerce/homepage.png',
     accentColor: '#FF6B35',
+    gradient: 'from-orange-600/40 via-rose-600/20 to-transparent',
+    projectIds: ['ecommerce', 'hybrid', 'boutique'],
+    showShowcase: true,
   },
   {
     id: 'finance',
+    slug: 'finance',
     title: 'Finance',
-    subtitle: 'Strategic Financial Control',
-    description: 'P&L management, cash flow forecasting, and financial analytics for data-driven business decisions.',
-    items: ['P&L Management', 'Cash Flow Forecast', 'Financial Analytics', 'Budget Planning'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-    gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+    subtitle: 'Financial Intelligence & Analytics',
+    description: 'P&L management systems, budget tracking dashboards, profitability analysis, and data-driven financial decision tools.',
+    image: '/assets/projects/budget-dashboard/homepage.png',
     accentColor: '#4ECDC4',
+    gradient: 'from-emerald-600/40 via-teal-600/20 to-transparent',
+    projectIds: ['budget-dashboard', 'profitability-analysis'],
   },
   {
     id: 'operations',
+    slug: 'operations',
     title: 'Operations',
-    subtitle: 'Streamlined Logistics',
-    description: 'End-to-end supply chain management, container logistics, scheduling, and organizational optimization.',
-    items: ['Container Logistics', 'Supply Chain', 'Scheduling Systems', 'Process Optimization'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-        <rect x="1" y="3" width="15" height="13" rx="2" />
-        <path d="M16 8h4l3 4v5h-7V8z" />
-        <circle cx="5.5" cy="18.5" r="2.5" />
-        <circle cx="18.5" cy="18.5" r="2.5" />
-      </svg>
-    ),
-    gradient: 'from-blue-500/20 via-indigo-500/10 to-transparent',
+    subtitle: 'Logistics & Supply Chain',
+    description: 'Real-time shipping calculators, container optimization, warehouse management, and end-to-end supply chain solutions.',
+    image: '/assets/projects/shipping/homepage.png',
     accentColor: '#6366F1',
+    gradient: 'from-indigo-600/40 via-blue-600/20 to-transparent',
+    projectIds: ['shipping', 'logistics'],
   },
   {
     id: 'agent',
+    slug: 'agent_ai',
     title: 'Agent & AI',
     subtitle: 'Intelligent Automation',
-    description: 'Custom AI agents, MCP integrations (Outlook, NetSuite), API development, and smart rendering solutions.',
-    items: ['AI Development', 'MCP Servers', 'API Integrations', 'Smart Render'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-        <path d="M9 14v2" />
-        <path d="M15 14v2" />
-      </svg>
-    ),
-    gradient: 'from-violet-500/20 via-purple-500/10 to-transparent',
-    accentColor: '#A855F7',
+    description: 'Custom AI agents, MCP server integrations, and smart rendering solutions powered by machine learning.',
+    image: '/assets/projects/ai-render/homepage.png',
+    accentColor: '#10B981',
+    gradient: 'from-emerald-600/40 via-green-600/20 to-transparent',
+    projectIds: ['ai-render'],
+    mcpProjects: true,
   },
 ]
 
@@ -218,6 +216,29 @@ const SHOWCASE_ITEMS = [
   },
 ]
 
+// Auto-rotate carousel component
+function AutoRotateCarousel({
+  activeIndex,
+  setActiveIndex,
+  totalItems,
+  interval = 5000
+}: {
+  activeIndex: number
+  setActiveIndex: (fn: (prev: number) => number) => void
+  totalItems: number
+  interval?: number
+}) {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev: number) => (prev + 1) % totalItems)
+    }, interval)
+
+    return () => clearInterval(timer)
+  }, [activeIndex, setActiveIndex, totalItems, interval]) // activeIndex resets timer on manual change
+
+  return null
+}
+
 export default function GalleryPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState(0)
@@ -226,7 +247,13 @@ export default function GalleryPage() {
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [showShowcase, setShowShowcase] = useState(false)
   const [activeShowcaseItem, setActiveShowcaseItem] = useState(0)
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [categorySectionIndex, setCategorySectionIndex] = useState(0)
+  const [projectParentCategory, setProjectParentCategory] = useState<string | null>(null)
+  const [playingPreviewReel, setPlayingPreviewReel] = useState<string | null>(null)
   const closingByPop = useRef(false)
+  const categoryClosingByPop = useRef(false)
   const showcaseClosingByPop = useRef(false)
 
   const projectHashMap: Record<string, string> = {
@@ -282,11 +309,7 @@ export default function GalleryPage() {
   ]
 
   const sections = [
-    { id: 'intro', label: 'Intro' },
-    { id: 'services', label: 'Services' },
-    ...PROJECTS.map(p => ({ id: p.id, label: p.title })),
-    { id: 'opensource', label: 'MCP Servers' },
-    { id: 'showcase', label: 'Showcase' },
+    { id: 'gallery', label: 'Portfolio Gallery' },
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ]
@@ -400,11 +423,16 @@ export default function GalleryPage() {
     const handlePopState = () => {
       closingByPop.current = true
       setSelectedProject(null)
+      setProjectParentCategory(null)
     }
 
     window.addEventListener('popstate', handlePopState)
-    const hash = projectHashMap[selectedProject] ?? selectedProject
-    window.history.pushState({ project: selectedProject }, '', `#${hash}`)
+    const projectSlug = projectHashMap[selectedProject] ?? selectedProject
+    // Build URL based on whether opened from category or directly
+    const url = projectParentCategory
+      ? `/${projectParentCategory}/${projectSlug}`
+      : `/${projectSlug}`
+    window.history.pushState({ project: selectedProject, parentCategory: projectParentCategory }, '', url)
 
     return () => {
       window.removeEventListener('popstate', handlePopState)
@@ -412,7 +440,7 @@ export default function GalleryPage() {
         window.history.back()
       }
     }
-  }, [selectedProject])
+  }, [selectedProject, projectParentCategory])
 
   // Handle browser back button for Showcase modal
   useEffect(() => {
@@ -436,27 +464,122 @@ export default function GalleryPage() {
     }
   }, [showShowcase])
 
+  // Handle browser back button for Category modal
+  useEffect(() => {
+    if (!selectedCategory) return
+
+    categoryClosingByPop.current = false
+    setCategorySectionIndex(0) // Reset to first section when opening
+
+    const handlePopState = () => {
+      categoryClosingByPop.current = true
+      setSelectedCategory(null)
+    }
+
+    // Find category to get slug for URL
+    const category = PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory)
+    const slug = category?.slug ?? selectedCategory
+
+    window.addEventListener('popstate', handlePopState)
+    window.history.pushState({ category: selectedCategory }, '', `/${slug}`)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      if (!categoryClosingByPop.current) {
+        window.history.back()
+      }
+    }
+  }, [selectedCategory])
+
+  // Get category data for modal
+  const currentCategory = selectedCategory ? PORTFOLIO_CATEGORIES.find(c => c.id === selectedCategory) : null
+  const categoryProjects = currentCategory ? PROJECTS.filter(p => currentCategory.projectIds.includes(p.id)) : []
+
+  // Handle scroll navigation for Category modal
+  useEffect(() => {
+    if (!selectedCategory || !currentCategory) return
+
+    let isScrolling = false
+    let scrollTimeout: NodeJS.Timeout
+    let touchpadDelta = 0
+    let touchpadTimeout: NodeJS.Timeout
+
+    const totalSections = categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 3 : 2)
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const isTouchpad = Math.abs(e.deltaY) < 50
+
+      if (isTouchpad) {
+        touchpadDelta += e.deltaY
+        clearTimeout(touchpadTimeout)
+        touchpadTimeout = setTimeout(() => {
+          if (Math.abs(touchpadDelta) > 150) {
+            if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
+              setCategorySectionIndex(prev => prev + 1)
+            } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
+              setCategorySectionIndex(prev => prev - 1)
+            }
+          }
+          touchpadDelta = 0
+        }, 50)
+      } else {
+        if (isScrolling) return
+        isScrolling = true
+        clearTimeout(scrollTimeout)
+
+        if (e.deltaY > 0 && categorySectionIndex < totalSections - 1) {
+          setCategorySectionIndex(prev => prev + 1)
+        } else if (e.deltaY < 0 && categorySectionIndex > 0) {
+          setCategorySectionIndex(prev => prev - 1)
+        }
+
+        scrollTimeout = setTimeout(() => {
+          isScrolling = false
+        }, 800)
+      }
+    }
+
+    window.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel)
+      clearTimeout(scrollTimeout)
+      clearTimeout(touchpadTimeout)
+    }
+  }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
+
   const project = selectedProject ? PROJECTS.find(p => p.id === selectedProject) : null
 
   return (
     <div className="h-[100svh] md:h-screen w-screen bg-[#0A0A0B] overflow-hidden relative">
       {/* Header */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 px-4 pb-2 md:px-6 md:pb-5 flex items-center justify-between bg-[#0A0A0B]/80 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none"
+        className="fixed top-0 left-0 right-0 z-[200] px-5 pb-3 md:px-8 md:pb-5 flex items-center justify-between bg-[#0A0A0B]/80 backdrop-blur-sm"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
       >
         <button
-          onClick={() => setActiveSection(0)}
-          className="text-xs text-[#6B6B70] hover:text-white transition-colors"
+          onClick={() => {
+            setSelectedCategory(null)
+            setSelectedProject(null)
+            setShowShowcase(false)
+            setActiveSection(0)
+          }}
+          className="text-sm md:text-base text-[#6B6B70] hover:text-white transition-colors font-light"
         >
           Portfolio
         </button>
-        <nav className="flex items-center gap-4 md:gap-6">
-          {['Work', 'About', 'Contact'].map((item, i) => (
+        <nav className="flex items-center gap-5 md:gap-8">
+          {['Work', 'About', 'Contact'].map((item) => (
             <button
               key={item}
-              onClick={() => setActiveSection(item === 'Work' ? 1 : item === 'About' ? sections.length - 2 : sections.length - 1)}
-              className="text-xs text-[#6B6B70] hover:text-white transition-colors"
+              onClick={() => {
+                setSelectedCategory(null)
+                setSelectedProject(null)
+                setShowShowcase(false)
+                setActiveSection(item === 'Work' ? 0 : item === 'About' ? 1 : 2)
+              }}
+              className="text-sm md:text-base text-[#6B6B70] hover:text-white transition-colors font-light"
             >
               {item}
             </button>
@@ -484,409 +607,318 @@ export default function GalleryPage() {
         ))}
       </div>
 
-      {/* Main Content */}
-      <div className="relative h-full">
-        {/* Intro Section */}
+      {/* Main Content - Hidden when project, category or showcase is open */}
+      <div className={`relative h-full ${selectedProject || selectedCategory || showShowcase ? 'invisible' : ''}`}>
+        {/* Portfolio Gallery - Horizontal Carousel Section (Homepage) */}
         <GallerySection isActive={activeSection === 0}>
-              <div className="flex flex-col items-center justify-center h-full text-center px-4 md:px-6">
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-4xl md:text-6xl lg:text-8xl font-light tracking-tight mb-6"
-                >
-                  Portfolio Gallery
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
-                  className="text-[#6B6B70] text-base md:text-lg max-w-md"
-                >
-                  A curated collection of digital experiences
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-12 flex flex-col items-center gap-2 text-[#6B6B70]"
-                >
-                  <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
-                  <motion.div
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                  >
-                    ↓
-                  </motion.div>
-                </motion.div>
-              </div>
-        </GallerySection>
+          <div className="relative h-full overflow-hidden">
+            {/* Auto-rotation effect */}
+            <AutoRotateCarousel
+              activeIndex={activeCarouselIndex}
+              setActiveIndex={setActiveCarouselIndex}
+              totalItems={PORTFOLIO_CATEGORIES.length}
+              interval={6800}
+            />
 
-        {/* Services Section - 4 Cards */}
-        <GallerySection isActive={activeSection === 1}>
-          <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-6xl w-full"
-            >
-              <div className="text-center mb-8 md:mb-12">
-                <motion.span
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-xs text-[#6B6B70] uppercase tracking-[0.2em] mb-4 block font-medium"
-                >
-                  Full-Service Consulting
-                </motion.span>
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-2xl md:text-3xl lg:text-4xl font-light"
-                >
-                  From A to Z
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-[#6B6B70] text-sm md:text-base mt-3 max-w-lg mx-auto"
-                >
-                  Complete business transformation across every department
-                </motion.p>
-              </div>
+            {/* Title - positioned between menu and cards */}
+            <div className="absolute top-[12%] left-0 right-0 z-10">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-center"
+              >
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extralight text-white tracking-tight">
+                  Portfolio
+                </h1>
+                <p className="text-[#52525b] text-sm mt-2">Select a category to explore</p>
+              </motion.div>
+            </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                {SERVICES.map((service, idx) => (
+            {/* Cards - vertically centered */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-16">
+
+              {/* Carousel Container */}
+              <div className="relative flex items-center justify-center px-4 md:px-12 lg:px-20 w-full" style={{ perspective: '1500px' }}>
+              {PORTFOLIO_CATEGORIES.map((category, idx) => {
+                const offset = idx - activeCarouselIndex
+                const isActive = offset === 0
+                const isVisible = Math.abs(offset) <= 1
+
+                return (
                   <motion.div
-                    key={service.id}
-                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    whileHover={{
-                      scale: 1.02,
-                      borderColor: service.accentColor + '60',
-                      transition: { duration: 0.2 }
+                    key={category.id}
+                    className="absolute w-full max-w-[680px] lg:max-w-[820px]"
+                    initial={false}
+                    animate={{
+                      x: `${offset * 105}%`,
+                      z: isActive ? 0 : -300,
+                      rotateY: offset * -35,
+                      scale: isActive ? 1 : 0.8,
+                      opacity: isVisible ? (isActive ? 1 : 0.4) : 0,
                     }}
                     transition={{
-                      delay: 0.3 + idx * 0.1,
-                      duration: 0.5,
-                      ease: [0.16, 1, 0.3, 1]
+                      duration: 0.7,
+                      ease: [0.32, 0.72, 0, 1]
                     }}
-                    className="group relative p-4 md:p-5 lg:p-6 bg-[#141416] rounded-xl border border-[#2a2a2d] overflow-hidden cursor-default"
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      zIndex: 10 - Math.abs(offset),
+                      pointerEvents: isActive ? 'auto' : 'none'
+                    }}
                   >
-                    {/* Gradient overlay */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                    />
-
-                    {/* Accent line */}
+                    {/* Horizontal Card */}
                     <motion.div
-                      className="absolute top-0 left-0 right-0 h-[2px]"
-                      style={{ backgroundColor: service.accentColor }}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ delay: 0.5 + idx * 0.1, duration: 0.6 }}
-                    />
-
-                    <div className="relative z-10">
-                      {/* Icon */}
-                      <div
-                        className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
-                        style={{
-                          backgroundColor: service.accentColor + '15',
-                          color: service.accentColor
-                        }}
-                      >
-                        {service.icon}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-base md:text-lg font-medium text-[#E8E4DF] mb-1">
-                        {service.title}
-                      </h3>
-                      <p className="text-xs text-[#6B6B70] mb-3 hidden md:block">
-                        {service.subtitle}
-                      </p>
-
-                      {/* Description - Hidden on mobile */}
-                      <p className="text-xs md:text-sm text-[#A1A1A6] leading-relaxed mb-4 line-clamp-2 md:line-clamp-3 hidden lg:block">
-                        {service.description}
-                      </p>
-
-                      {/* Items */}
-                      <div className="space-y-1.5">
-                        {service.items.slice(0, 3).map((item, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 text-xs text-[#6B6B70]"
-                          >
+                      onClick={() => {
+                        if (!isActive) {
+                          setActiveCarouselIndex(idx)
+                        } else if (category.projectIds.length > 0 || category.mcpProjects) {
+                          setSelectedCategory(category.id)
+                        }
+                      }}
+                      whileHover={isActive ? { scale: 1.01 } : {}}
+                      whileTap={isActive ? { scale: 0.99 } : {}}
+                      className={`relative w-full aspect-[16/8] md:aspect-[16/7] rounded-2xl md:rounded-3xl overflow-hidden ${
+                        isActive && (category.projectIds.length > 0 || category.mcpProjects)
+                          ? 'cursor-pointer'
+                          : 'cursor-default'
+                      }`}
+                      style={{
+                        background: '#111113',
+                        boxShadow: isActive
+                          ? `0 40px 80px -20px ${category.accentColor}35`
+                          : '0 20px 40px -15px rgba(0,0,0,0.6)',
+                      }}
+                    >
+                      {/* Card Layout: Image Left + Content Right */}
+                      <div className="flex h-full">
+                        {/* Left - Image placeholder (45%) with 16:9 container */}
+                        <div className="relative w-[45%] h-full overflow-hidden">
+                          {category.id === 'sales-marketing' ? (
+                            /* Sales & Marketing: Camera movement video */
+                            <video
+                              autoPlay={isActive}
+                              loop
+                              muted
+                              playsInline
+                              preload={isActive ? 'auto' : isVisible ? 'metadata' : 'none'}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              ref={(el) => { if (el) { isActive ? el.play().catch(() => {}) : el.pause() } }}
+                            >
+                              <source src="/assets/homepage/sales-marketing-card.mp4" type="video/mp4" />
+                            </video>
+                          ) : category.id === 'operations' ? (
+                            /* Operations: Logistics video */
+                            <video
+                              autoPlay={isActive}
+                              loop
+                              muted
+                              playsInline
+                              preload={isActive ? 'auto' : isVisible ? 'metadata' : 'none'}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              ref={(el) => { if (el) { isActive ? el.play().catch(() => {}) : el.pause() } }}
+                            >
+                              <source src="/assets/homepage/operations-card.mp4" type="video/mp4" />
+                            </video>
+                          ) : category.id === 'agent' ? (
+                            /* Agent & AI: Code/AI video */
+                            <video
+                              autoPlay={isActive}
+                              loop
+                              muted
+                              playsInline
+                              preload={isActive ? 'auto' : isVisible ? 'metadata' : 'none'}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              ref={(el) => { if (el) { isActive ? el.play().catch(() => {}) : el.pause() } }}
+                            >
+                              <source src="/assets/homepage/agent-card.mp4" type="video/mp4" />
+                            </video>
+                          ) : category.id === 'finance' ? (
+                            /* Finance: Dashboard video */
+                            <video
+                              autoPlay={isActive}
+                              loop
+                              muted
+                              playsInline
+                              preload={isActive ? 'auto' : isVisible ? 'metadata' : 'none'}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              ref={(el) => { if (el) { isActive ? el.play().catch(() => {}) : el.pause() } }}
+                            >
+                              <source src="/assets/homepage/finance-card.mp4" type="video/mp4" />
+                            </video>
+                          ) : (
+                            /* Default placeholder for other categories */
                             <div
-                              className="w-1 h-1 rounded-full"
-                              style={{ backgroundColor: service.accentColor }}
-                            />
-                            <span className="truncate">{item}</span>
-                          </div>
-                        ))}
-                        {service.items.length > 3 && (
-                          <div className="text-xs text-[#6B6B70] pl-3">
-                            +{service.items.length - 3} more
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </GallerySection>
-
-        {/* Project Sections */}
-        {PROJECTS.map((proj, i) => (
-          <GallerySection key={proj.id} isActive={activeSection === i + 2}>
-                <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 lg:gap-16 max-w-6xl w-full items-center landscape-grid">
-                    {/* Left - Info */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="order-2 lg:order-1"
-                    >
-                      <span className="text-xs text-[#6B6B70] uppercase tracking-widest mb-2 md:mb-4 lg:mb-4 block">
-                        {String(i + 1).padStart(2, '0')} / {String(PROJECTS.length).padStart(2, '0')}
-                      </span>
-                      <h2 className="text-2xl md:text-3xl lg:text-5xl font-light mb-2 md:mb-4 lg:mb-4 line-clamp-1 md:line-clamp-2 lg:line-clamp-none">{proj.title}</h2>
-                      <p className="text-[#A1A1A6] mb-2 md:mb-4 lg:mb-6 text-sm md:text-base line-clamp-1 lg:line-clamp-none">{proj.subtitle}</p>
-                      <p className="text-[#6B6B70] text-sm leading-relaxed mb-4 md:mb-6 lg:mb-8 line-clamp-2 md:line-clamp-3 lg:line-clamp-none landscape-hide">{proj.description}</p>
-
-                      <div className="flex flex-wrap gap-2 mb-4 md:mb-6 lg:mb-8 landscape-hide">
-                        {proj.tech.slice(0, 4).map(tech => (
-                          <span
-                            key={tech}
-                            className="px-2 md:px-3 py-1 text-xs border border-[#3a3a3d] text-[#6B6B70]"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                        <span className="hidden lg:inline-flex flex-wrap gap-2">
-                          {proj.tech.slice(4).map(tech => (
-                            <span
-                              key={tech}
-                              className="px-3 py-1 text-xs border border-[#3a3a3d] text-[#6B6B70]"
+                              className="absolute inset-0 flex items-center justify-center"
+                              style={{ background: `linear-gradient(145deg, ${category.accentColor}12 0%, #111113 80%)` }}
                             >
-                              {tech}
-                            </span>
-                          ))}
-                        </span>
-                        {proj.tech.length > 4 && (
-                          <span className="px-2 md:px-3 py-1 text-xs border border-[#3a3a3d] text-[#6B6B70] md:inline lg:hidden">
-                            +{proj.tech.length - 4}
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => setSelectedProject(proj.id)}
-                        className="inline-flex items-center gap-2 text-sm text-[#E8E4DF] hover:gap-4 transition-all"
-                      >
-                        View Project <span>→</span>
-                      </button>
-                    </motion.div>
-
-                    {/* Right - Preview */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 50, rotateY: -10 }}
-                      animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                      className="relative cursor-pointer order-1 lg:order-2"
-                      style={{ perspective: '1000px' }}
-                      onClick={() => setSelectedProject(proj.id)}
-                    >
-                      <div
-                        className="rounded-xl overflow-hidden border border-[#2a2a2d] hover:border-[#4a4a4d] transition-colors"
-                        style={{ boxShadow: `0 20px 60px -20px ${proj.color}40` }}
-                      >
-                        {/* Mini Browser Header */}
-                        <div className="bg-[#1a1a1d] px-3 py-2 flex items-center border-b border-[#2a2a2d]">
-                          <div className="flex gap-1.5 w-12">
-                            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-                          </div>
-                          <div className="flex-1 flex justify-center">
-                            {proj.url && (
-                              <div className="bg-[#0f0f12] rounded px-3 py-1 flex items-center gap-1.5 justify-center">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6B6B70" strokeWidth="2">
-                                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                              <div className="relative w-[85%] aspect-video rounded-lg overflow-hidden" style={{ background: `${category.accentColor}08` }}>
+                                <svg className="absolute inset-0 w-full h-full opacity-15" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice">
+                                  <defs>
+                                    <linearGradient id={`placeholder-grad-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                      <stop offset="0%" stopColor={category.accentColor} stopOpacity="0.4" />
+                                      <stop offset="100%" stopColor={category.accentColor} stopOpacity="0.1" />
+                                    </linearGradient>
+                                  </defs>
+                                  <rect x="20" y="20" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" />
+                                  <rect x="65" y="20" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" opacity="0.7" />
+                                  <rect x="110" y="20" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" opacity="0.5" />
+                                  <rect x="20" y="50" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" opacity="0.6" />
+                                  <rect x="65" y="50" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" opacity="0.4" />
+                                  <rect x="110" y="50" width="35" height="25" fill={`url(#placeholder-grad-${idx})`} rx="4" opacity="0.3" />
                                 </svg>
-                                <span className="text-[#6B6B70] text-xs">{new URL(proj.url).hostname}</span>
+                                <div className="absolute bottom-2 right-2 text-[10px] text-white/20 font-mono">16:9</div>
                               </div>
-                            )}
-                          </div>
-                          <div className="w-12" />
+                            </div>
+                          )}
+
+                          {/* Accent line on far left */}
+                          <motion.div
+                            className="absolute left-0 top-0 bottom-0 w-1"
+                            style={{ background: category.accentColor }}
+                            initial={{ scaleY: 0 }}
+                            animate={{ scaleY: isActive ? 1 : 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                          />
                         </div>
-                        {/* Screenshot */}
-                        <img
-                          src={proj.screenshot}
-                          alt={proj.title}
-                          className="w-full h-auto block max-h-[280px] md:max-h-none object-cover object-top"
-                        />
-                      </div>
 
-                      {/* Floating accent */}
-                      <motion.div
-                        animate={{ y: [-5, 5, -5] }}
-                        transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-                        className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 w-12 h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-lg pointer-events-none landscape-hide"
-                        style={{ backgroundColor: proj.color, opacity: 0.1 }}
-                      />
-                    </motion.div>
-                  </div>
-                </div>
-          </GallerySection>
-        ))}
-
-        {/* Open Source Section */}
-        <GallerySection isActive={activeSection === sections.length - 4}>
-              <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="max-w-4xl w-full"
-                >
-                  <span className="text-xs text-[#6B6B70] uppercase tracking-widest mb-6 block text-center">Open Source</span>
-                  <h2 className="text-3xl md:text-4xl font-light mb-8 md:mb-12 text-center">MCP Servers</h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {MCP_PROJECTS.map((mcp, idx) => (
-                      <motion.div
-                        key={mcp.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        whileHover={{ scale: 1.02, borderColor: '#4a4a4d' }}
-                        transition={{
-                          opacity: { delay: 0.2 + (0.15 * idx), duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-                          y: { delay: 0.2 + (0.15 * idx), duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-                          scale: { duration: 0.3, ease: 'easeOut' },
-                          borderColor: { duration: 0.3 }
-                        }}
-                        className="p-6 bg-[#141416] rounded-xl border border-[#2a2a2d] cursor-default"
-                        style={{ boxShadow: `0 20px 60px -20px ${mcp.color}20` }}
-                      >
-                        <div className="flex items-start mb-4">
-                          <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: mcp.color + '20' }}
+                        {/* Right - Content (55%) */}
+                        <div className="flex-1 flex flex-col justify-center p-6 md:p-10 lg:p-12">
+                          {/* Title */}
+                          <motion.h2
+                            className="text-2xl md:text-4xl lg:text-5xl font-light text-white mb-4 md:mb-5 tracking-tight"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: isActive ? 1 : 0.6, y: 0 }}
+                            transition={{ delay: 0.15 }}
                           >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={mcp.color} strokeWidth="2">
-                              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                            </svg>
-                          </div>
-                        </div>
-                        <h3 className="text-lg font-medium text-[#E8E4DF] mb-2">{mcp.title}</h3>
-                        <p className="text-sm text-[#6B6B70] leading-relaxed mb-4">{mcp.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {mcp.tags.map(tag => (
-                            <span
-                              key={tag}
-                              className="text-xs px-2 py-1 rounded-full"
-                              style={{ backgroundColor: mcp.color + '15', color: mcp.color }}
-                            >
-                              {tag}
+                            {category.title}
+                          </motion.h2>
+
+                          {/* Subtitle */}
+                          <motion.p
+                            className="text-sm md:text-lg font-medium mb-4"
+                            style={{ color: category.accentColor }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: isActive ? 1 : 0.5 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            {category.subtitle}
+                          </motion.p>
+
+                          {/* Description */}
+                          <motion.p
+                            className="text-[#71717a] text-sm md:text-base leading-relaxed mb-6 max-w-md"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: isActive ? 1 : 0.4 }}
+                            transition={{ delay: 0.25 }}
+                          >
+                            {category.description}
+                          </motion.p>
+
+                          {/* Footer */}
+                          <motion.div
+                            className="flex items-center gap-6"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: isActive ? 1 : 0.4, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <span className="text-xs md:text-sm text-[#52525b]">
+                              {(() => {
+                                const projectCount = category.projectIds.length + (category.mcpProjects ? 2 : 0)
+                                return projectCount > 0
+                                  ? `${projectCount} project${projectCount > 1 ? 's' : ''}`
+                                  : 'Coming Soon'
+                              })()}
                             </span>
-                          ))}
+                            {(category.projectIds.length > 0 || category.mcpProjects) && isActive && (
+                              <motion.span
+                                className="flex items-center gap-2 text-sm font-medium group"
+                                style={{ color: category.accentColor }}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                whileHover={{ x: 5 }}
+                              >
+                                <span>Explore Projects</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                              </motion.span>
+                            )}
+                          </motion.div>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-        </GallerySection>
-
-        {/* Showcase Section - Media Presentation */}
-        <GallerySection isActive={activeSection === sections.length - 3}>
-          <div className="flex items-center justify-center h-full px-4 md:px-8 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-4xl w-full text-center"
-            >
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-xs text-[#6B6B70] uppercase tracking-[0.2em] mb-4 block"
-              >
-                Creative Capabilities
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-light mb-4"
-              >
-                Visual Excellence
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-[#6B6B70] text-sm md:text-base mb-10 max-w-lg mx-auto"
-              >
-                AI-powered media generation showcasing our ability to transform static content into dynamic experiences
-              </motion.p>
-
-              {/* Preview Cards - Show first 3 items */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                {SHOWCASE_ITEMS.slice(0, 3).map((item, idx) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + idx * 0.1 }}
-                    className="relative group rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square"
-                  >
-                    <img
-                      src={item.originals[0]}
-                      alt={item.title}
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
-                      <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
-                    </div>
-                    {item.generated.some(g => g.type === 'video') && (
-                      <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-                          <polygon points="5 3 19 12 5 21" />
-                        </svg>
                       </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
 
-              {/* CTA Button */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                onClick={() => setShowShowcase(true)}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#E8E4DF] to-[#d4cfc8] text-[#0A0A0B] rounded-lg font-medium text-sm hover:opacity-90 transition-all hover:gap-4"
+                      {/* Glow overlay */}
+                      {isActive && (
+                        <motion.div
+                          className="absolute inset-0 pointer-events-none rounded-2xl md:rounded-3xl"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          style={{
+                            boxShadow: `inset 0 0 80px ${category.accentColor}08`
+                          }}
+                        />
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )
+              })}
+
+              {/* Navigation Arrows */}
+              <button
+                onClick={() => setActiveCarouselIndex(prev => prev === 0 ? PORTFOLIO_CATEGORIES.length - 1 : prev - 1)}
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                style={{
+                  background: 'rgba(17,17,19,0.95)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.08)'
+                }}
               >
-                <span>Explore Full Showcase</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/50 group-hover:text-white transition-colors">
+                  <path d="M15 18l-6-6 6-6" />
                 </svg>
-              </motion.button>
-            </motion.div>
+              </button>
+              <button
+                onClick={() => setActiveCarouselIndex(prev => prev === PORTFOLIO_CATEGORIES.length - 1 ? 0 : prev + 1)}
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                style={{
+                  background: 'rgba(17,17,19,0.95)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.08)'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/50 group-hover:text-white transition-colors">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+            </div>
+
+            {/* Progress bars - positioned at bottom, between cards and screen edge */}
+            <div className="absolute bottom-[8%] left-0 right-0 flex items-center justify-center gap-3">
+              {PORTFOLIO_CATEGORIES.map((category, idx) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCarouselIndex(idx)}
+                  className="relative h-1 rounded-full overflow-hidden transition-all duration-500"
+                  style={{
+                    width: activeCarouselIndex === idx ? '48px' : '20px',
+                    background: '#27272a'
+                  }}
+                >
+                  {activeCarouselIndex === idx && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: category.accentColor }}
+                      initial={{ scaleX: 0, transformOrigin: 'left' }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 7, ease: 'linear' }}
+                      key={`progress-${idx}-${activeCarouselIndex}`}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </GallerySection>
 
@@ -971,22 +1003,16 @@ export default function GalleryPage() {
         </GallerySection>
       </div>
 
-      {/* Project Modal */}
-      <AnimatePresence>
+      {/* Project Page */}
+      <AnimatePresence mode="wait">
         {selectedProject && project && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-[#0A0A0B]/95 backdrop-blur-xl overflow-auto"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[100] bg-[#0A0A0B] overflow-auto"
           >
-            <button
-              onClick={() => setSelectedProject(null)}
-              className="fixed top-6 right-6 text-[#6B6B70] hover:text-white transition-colors z-10"
-            >
-              ✕ Close
-            </button>
-
             <div className="min-h-screen px-3 pt-20 pb-12 sm:px-8 sm:pt-20 sm:pb-14 md:p-12 md:pt-24">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -1259,7 +1285,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Navigation Tabs - Scrollable */}
-            <div className="sticky top-0 z-10 bg-[#0A0A0B]/95 backdrop-blur-lg border-b border-[#2a2a2d]">
+            <div className="sticky top-0 z-10 bg-[#0A0A0B]/98 backdrop-blur-sm border-b border-[#2a2a2d]">
               <div className="flex overflow-x-auto gap-1 p-4 max-w-7xl mx-auto scrollbar-hide">
                 {SHOWCASE_ITEMS.map((item, idx) => (
                   <button
@@ -1456,9 +1482,565 @@ export default function GalleryPage() {
         )}
       </AnimatePresence>
 
-      {/* Progress Bar */}
+      {/* Category Page - Shows projects for selected category */}
+      <AnimatePresence mode="wait">
+        {selectedCategory && currentCategory && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[100] bg-[#0A0A0B] overflow-hidden"
+          >
+            {/* Navigation Dots - Hidden */}
+            <div className="hidden fixed right-6 top-1/2 -translate-y-1/2 z-20 flex-col gap-2">
+              {/* Category intro dot */}
+              <button
+                onClick={() => setCategorySectionIndex(0)}
+                className="group flex items-center gap-3"
+              >
+                <span className={`text-[10px] transition-opacity ${categorySectionIndex === 0 ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+                  {currentCategory.title}
+                </span>
+                <div
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    categorySectionIndex === 0 ? 'scale-125' : 'bg-[#3a3a3d] hover:bg-[#6B6B70]'
+                  }`}
+                  style={{ backgroundColor: categorySectionIndex === 0 ? currentCategory.accentColor : undefined }}
+                />
+              </button>
+              {/* Project dots */}
+              {categoryProjects.map((proj, idx) => (
+                <button
+                  key={proj.id}
+                  onClick={() => setCategorySectionIndex(idx + 1)}
+                  className="group flex items-center gap-3"
+                >
+                  <span className={`text-[10px] transition-opacity ${categorySectionIndex === idx + 1 ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+                    {proj.title}
+                  </span>
+                  <div
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      categorySectionIndex === idx + 1 ? 'scale-125' : 'bg-[#3a3a3d] hover:bg-[#6B6B70]'
+                    }`}
+                    style={{ backgroundColor: categorySectionIndex === idx + 1 ? currentCategory.accentColor : undefined }}
+                  />
+                </button>
+              ))}
+              {/* Visual Excellence dot (for Sales & Marketing) */}
+              {currentCategory.showShowcase && (
+                <button
+                  onClick={() => setCategorySectionIndex(categoryProjects.length + 1)}
+                  className="group flex items-center gap-3"
+                >
+                  <span className={`text-[10px] transition-opacity ${categorySectionIndex === categoryProjects.length + 1 ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+                    Visual Excellence
+                  </span>
+                  <div
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      categorySectionIndex === categoryProjects.length + 1 ? 'scale-125' : 'bg-[#3a3a3d] hover:bg-[#6B6B70]'
+                    }`}
+                    style={{ backgroundColor: categorySectionIndex === categoryProjects.length + 1 ? currentCategory.accentColor : undefined }}
+                  />
+                </button>
+              )}
+              {/* MCP dot (for Agent & AI) */}
+              {currentCategory.mcpProjects && (
+                <button
+                  onClick={() => setCategorySectionIndex(categoryProjects.length + 1)}
+                  className="group flex items-center gap-3"
+                >
+                  <span className={`text-[10px] transition-opacity ${categorySectionIndex === categoryProjects.length + 1 ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+                    MCP Servers
+                  </span>
+                  <div
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      categorySectionIndex === categoryProjects.length + 1 ? 'scale-125' : 'bg-[#3a3a3d] hover:bg-[#6B6B70]'
+                    }`}
+                    style={{ backgroundColor: categorySectionIndex === categoryProjects.length + 1 ? currentCategory.accentColor : undefined }}
+                  />
+                </button>
+              )}
+            </div>
+
+            {/* Sections Container */}
+            <div className="h-full w-full relative">
+              {/* Category Intro Section */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: categorySectionIndex === 0 ? 1 : 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 md:px-6"
+                style={{ pointerEvents: categorySectionIndex === 0 ? 'auto' : 'none' }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-3 px-4 py-2 rounded-full mb-10 md:mb-12"
+                  style={{ backgroundColor: currentCategory.accentColor + '15' }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: currentCategory.accentColor }}
+                  />
+                  <span
+                    className="text-xs font-medium uppercase tracking-wider"
+                    style={{ color: currentCategory.accentColor }}
+                  >
+                    {currentCategory.subtitle}
+                  </span>
+                </motion.div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.8 }}
+                  className="text-4xl md:text-6xl lg:text-8xl font-light tracking-tight mb-6"
+                >
+                  {currentCategory.title}
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                  className="text-[#6B6B70] text-base md:text-lg max-w-md"
+                >
+                  {currentCategory.description}
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-12 flex flex-col items-center gap-2 text-[#6B6B70]"
+                >
+                  <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
+                  <motion.div
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    ↓
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+
+              {/* Project Sections */}
+              {categoryProjects.map((proj, idx) => (
+                <motion.div
+                  key={proj.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: categorySectionIndex === idx + 1 ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 flex items-center justify-center px-4 md:px-8 lg:px-12"
+                  style={{ pointerEvents: categorySectionIndex === idx + 1 ? 'auto' : 'none' }}
+                >
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 lg:gap-16 max-w-6xl w-full items-center">
+                    {/* Left - Info */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: categorySectionIndex === idx + 1 ? 1 : 0, x: categorySectionIndex === idx + 1 ? 0 : -50 }}
+                      transition={{ duration: 0.6 }}
+                      className="order-2 lg:order-1"
+                    >
+                      <span className="text-xs uppercase tracking-widest mb-2 md:mb-4 block" style={{ color: currentCategory.accentColor }}>
+                        {String(idx + 1).padStart(2, '0')} / {String(categoryProjects.length).padStart(2, '0')}
+                      </span>
+                      <h2 className="text-2xl md:text-3xl lg:text-5xl font-light mb-2 md:mb-4">{proj.title}</h2>
+                      <p className="text-[#A1A1A6] mb-2 md:mb-4 lg:mb-6 text-sm md:text-base">{proj.subtitle}</p>
+                      <p className="text-[#6B6B70] text-sm leading-relaxed mb-4 md:mb-6 lg:mb-8">{proj.description}</p>
+
+                      <div className="flex flex-wrap gap-2 mb-4 md:mb-6 lg:mb-8">
+                        {proj.tech.slice(0, 4).map(tech => (
+                          <span
+                            key={tech}
+                            className="px-2 md:px-3 py-1 text-xs border border-[#3a3a3d] text-[#6B6B70]"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {proj.tech.length > 4 && (
+                          <span className="px-2 md:px-3 py-1 text-xs border border-[#3a3a3d] text-[#6B6B70]">
+                            +{proj.tech.length - 4}
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const categorySlug = currentCategory.slug
+                          setProjectParentCategory(categorySlug)
+                          setSelectedProject(proj.id)
+                          setSelectedCategory(null)
+                        }}
+                        className="inline-flex items-center gap-2 text-sm hover:gap-4 transition-all"
+                        style={{ color: currentCategory.accentColor }}
+                      >
+                        View Project <span>→</span>
+                      </button>
+                    </motion.div>
+
+                    {/* Right - Preview */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 50, rotateY: -10 }}
+                      animate={{
+                        opacity: categorySectionIndex === idx + 1 ? 1 : 0,
+                        x: categorySectionIndex === idx + 1 ? 0 : 50,
+                        rotateY: categorySectionIndex === idx + 1 ? 0 : -10
+                      }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                      className="relative cursor-pointer order-1 lg:order-2"
+                      style={{ perspective: '1000px' }}
+                      onClick={() => {
+                        const categorySlug = currentCategory.slug
+                        setProjectParentCategory(categorySlug)
+                        setSelectedProject(proj.id)
+                        setSelectedCategory(null)
+                      }}
+                    >
+                      <div
+                        className="rounded-xl overflow-hidden border border-[#2a2a2d] hover:border-[#4a4a4d] transition-colors"
+                        style={{ boxShadow: `0 20px 60px -20px ${proj.color}40` }}
+                      >
+                        {/* Mini Browser Header */}
+                        <div className="bg-[#1a1a1d] px-3 py-2 flex items-center border-b border-[#2a2a2d]">
+                          <div className="flex gap-1.5 w-12">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+                          </div>
+                          <div className="flex-1 flex justify-center">
+                            {proj.url && (
+                              <div className="bg-[#0f0f12] rounded px-3 py-1 flex items-center gap-1.5 justify-center">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6B6B70" strokeWidth="2">
+                                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                <span className="text-[#6B6B70] text-xs">{new URL(proj.url).hostname}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="w-12" />
+                        </div>
+                        {/* Screenshot */}
+                        <img
+                          src={proj.screenshot}
+                          alt={proj.title}
+                          className="w-full h-auto block max-h-[280px] md:max-h-none object-cover object-top"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Floating accent */}
+                      <motion.div
+                        animate={{ y: [-5, 5, -5] }}
+                        transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                        className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 w-12 h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-lg pointer-events-none"
+                        style={{ backgroundColor: proj.color, opacity: 0.1 }}
+                      />
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Visual Excellence Section (for Sales & Marketing) */}
+              {currentCategory.showShowcase && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: categorySectionIndex === categoryProjects.length + 1 ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 flex items-center justify-center px-4 md:px-8 lg:px-12"
+                  style={{ pointerEvents: categorySectionIndex === categoryProjects.length + 1 ? 'auto' : 'none' }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="max-w-4xl w-full text-center"
+                  >
+                    <span className="text-xs uppercase tracking-[0.2em] mb-4 block" style={{ color: currentCategory.accentColor }}>
+                      Creative Capabilities
+                    </span>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4">
+                      Visual Excellence
+                    </h2>
+                    <p className="text-[#6B6B70] text-sm md:text-base mb-10 max-w-lg mx-auto">
+                      AI-powered media generation showcasing our ability to transform static content into dynamic experiences
+                    </p>
+
+                    {/* Preview Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                      {SHOWCASE_ITEMS.slice(0, 3).map((item, i) => {
+                        const videoSrc = item.generated.find(g => g.type === 'video')?.src
+                        const isPlaying = playingPreviewReel === item.id
+                        return (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 + i * 0.1 }}
+                            onClick={() => {
+                              if (videoSrc) {
+                                setPlayingPreviewReel(isPlaying ? null : item.id)
+                              }
+                            }}
+                            className="relative group rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square cursor-pointer"
+                          >
+                            {isPlaying && videoSrc ? (
+                              <video
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover"
+                              >
+                                <source src={videoSrc} type="video/mp4" />
+                              </video>
+                            ) : (
+                              <img
+                                src={item.originals[0]}
+                                alt={item.title}
+                                className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                                loading="lazy"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                              <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
+                              <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
+                            </div>
+                            {videoSrc && (
+                              <div className={`absolute top-3 right-3 w-8 h-8 rounded-full ${isPlaying ? 'bg-white/20' : 'bg-white/10'} backdrop-blur-sm flex items-center justify-center transition-all`}>
+                                {isPlaying ? (
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <rect x="6" y="4" width="4" height="16" />
+                                    <rect x="14" y="4" width="4" height="16" />
+                                  </svg>
+                                ) : (
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21" />
+                                  </svg>
+                                )}
+                              </div>
+                            )}
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+
+                    {/* CTA Button */}
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                      onClick={() => {
+                        setShowShowcase(true)
+                        setSelectedCategory(null)
+                      }}
+                      className="inline-flex items-center gap-3 px-8 py-4 rounded-lg font-medium text-sm hover:opacity-90 transition-all hover:gap-4"
+                      style={{ backgroundColor: currentCategory.accentColor, color: '#0A0A0B' }}
+                    >
+                      <span>Explore Full Showcase</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* MCP Projects Section (for Agent & AI) */}
+              {currentCategory.mcpProjects && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: categorySectionIndex === categoryProjects.length + 1 ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 flex items-center justify-center px-4 md:px-8 lg:px-12"
+                  style={{ pointerEvents: categorySectionIndex === categoryProjects.length + 1 ? 'auto' : 'none' }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="max-w-4xl w-full"
+                  >
+                    <span className="text-xs text-[#6B6B70] uppercase tracking-widest mb-6 block text-center">Open Source</span>
+                    <h2 className="text-3xl md:text-4xl font-light mb-8 md:mb-12 text-center">MCP Servers</h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {[
+                        {
+                          id: 'netsuite-mcp',
+                          title: 'NetSuite MCP Server',
+                          description: 'Production-ready Model Context Protocol server for NetSuite ERP integration. Enables AI assistants to interact with NetSuite data through natural language.',
+                          tags: ['Open Source', 'TypeScript', 'ERP Integration'],
+                          color: '#4ECDC4',
+                          github: 'https://github.com/Concretizzare/netsuite-mcp-server',
+                        },
+                        {
+                          id: 'outlook-mcp',
+                          title: 'Outlook MCP Server',
+                          description: 'Bring email intelligence to AI workflows. Connects AI assistants to Microsoft Outlook for smart email management and automation.',
+                          tags: ['Open Source', 'TypeScript', 'Email Automation'],
+                          color: '#0078D4',
+                          github: 'https://github.com/Concretizzare/outlook-mcp-server',
+                        },
+                      ].map((mcp, i) => (
+                        <motion.div
+                          key={mcp.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          whileHover={{ scale: 1.02, borderColor: '#4a4a4d' }}
+                          transition={{
+                            opacity: { delay: 0.2 + (0.15 * i), duration: 0.8 },
+                            y: { delay: 0.2 + (0.15 * i), duration: 0.8 },
+                            scale: { duration: 0.3 },
+                            borderColor: { duration: 0.3 }
+                          }}
+                          className="p-6 bg-[#141416] rounded-xl border border-[#2a2a2d] block"
+                          style={{ boxShadow: `0 20px 60px -20px ${mcp.color}20` }}
+                        >
+                          <div className="flex items-start mb-4">
+                            <div
+                              className="w-10 h-10 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: mcp.color + '20' }}
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={mcp.color} strokeWidth="2">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                              </svg>
+                            </div>
+                          </div>
+                          <h3 className="text-lg font-medium text-[#E8E4DF] mb-2">{mcp.title}</h3>
+                          <p className="text-sm text-[#6B6B70] leading-relaxed mb-4">{mcp.description}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {mcp.tags.map(tag => (
+                              <span
+                                key={tag}
+                                className="text-xs px-2 py-1 rounded-full"
+                                style={{ backgroundColor: mcp.color + '15', color: mcp.color }}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* Empty State for Finance */}
+              {categoryProjects.length === 0 && !currentCategory.mcpProjects && !currentCategory.showShowcase && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: categorySectionIndex === 0 ? 1 : 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ pointerEvents: categorySectionIndex === 0 ? 'auto' : 'none' }}
+                >
+                  <div className="text-center">
+                    <div
+                      className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+                      style={{ backgroundColor: currentCategory.accentColor + '15' }}
+                    >
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={currentCategory.accentColor} strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-[#E8E4DF] mb-2">Coming Soon</h3>
+                    <p className="text-[#6B6B70] text-sm max-w-md mx-auto">
+                      We're working on exciting projects in this category. Check back soon or get in touch to discuss your needs.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Contact Section */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: categorySectionIndex === categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 2 : 1) ? 1 : 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex items-center justify-center px-4 md:px-8 lg:px-12"
+                style={{ pointerEvents: categorySectionIndex === categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 2 : 1) ? 'auto' : 'none' }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="max-w-xl w-full"
+                >
+                  <span className="text-xs uppercase tracking-widest mb-6 block text-center" style={{ color: currentCategory.accentColor }}>Contact</span>
+                  <h2 className="text-3xl md:text-4xl font-light mb-6 md:mb-8 text-center">Let's work together</h2>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 bg-transparent border-b border-[#2a2a2d] focus:outline-none transition-colors text-sm"
+                      style={{ borderColor: formData.name ? currentCategory.accentColor : undefined }}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 bg-transparent border-b border-[#2a2a2d] focus:outline-none transition-colors text-sm"
+                      style={{ borderColor: formData.email ? currentCategory.accentColor : undefined }}
+                    />
+                    <textarea
+                      placeholder="Message"
+                      rows={4}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 bg-transparent border-b border-[#2a2a2d] focus:outline-none transition-colors text-sm resize-none"
+                      style={{ borderColor: formData.message ? currentCategory.accentColor : undefined }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={formStatus === 'sending'}
+                      className="block w-full py-3 text-[#0A0A0B] text-sm font-medium hover:opacity-90 transition-opacity mt-6 disabled:opacity-50"
+                      style={{ backgroundColor: currentCategory.accentColor }}
+                    >
+                      {formStatus === 'sending' ? 'Sending...' : formStatus === 'success' ? 'Sent!' : formStatus === 'error' ? 'Error - Try Again' : 'Send Message'}
+                    </button>
+                  </form>
+
+                  <div className="flex justify-center gap-6 mt-12">
+                    <a href="https://github.com/Concretizzare/" target="_blank" rel="noopener noreferrer" className="text-xs text-[#6B6B70] hover:text-white transition-colors">
+                      GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/luca-franchi-325b83198" target="_blank" rel="noopener noreferrer" className="text-xs text-[#6B6B70] hover:text-white transition-colors">
+                      LinkedIn
+                    </a>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* Progress Bar */}
+            <div
+              className="fixed left-4 right-4 bottom-3 sm:left-6 sm:right-6 sm:bottom-4 md:bottom-6 h-px bg-[#2a2a2d] z-20"
+            >
+              <motion.div
+                className="h-full"
+                style={{ backgroundColor: currentCategory.accentColor }}
+                animate={{
+                  width: `${((categorySectionIndex + 1) / (categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 3 : 2))) * 100}%`
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Progress Bar - Hidden when project or category is open */}
       <div
-        className="fixed left-4 right-4 bottom-3 sm:left-6 sm:right-6 sm:bottom-4 md:bottom-6 h-px bg-[#2a2a2d]"
+        className={`fixed left-4 right-4 bottom-3 sm:left-6 sm:right-6 sm:bottom-4 md:bottom-6 h-px bg-[#2a2a2d] ${selectedProject || selectedCategory ? 'invisible' : ''}`}
         style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <motion.div
@@ -1467,6 +2049,19 @@ export default function GalleryPage() {
           transition={{ duration: 0.3 }}
         />
       </div>
+
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/393275762477"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-12 right-6 z-[250] w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
+        style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </div>
   )
 }
@@ -1542,6 +2137,7 @@ function BrowserPreview({ url, screenshot, projectColor }: { url: string | null;
             src={screenshot}
             alt={url ? `${domain} preview` : 'Project preview'}
             className="w-full h-auto block max-h-[320px] sm:max-h-[420px] md:max-h-[760px] object-cover object-top"
+            loading="lazy"
           />
         </div>
       </WrapperComponent>

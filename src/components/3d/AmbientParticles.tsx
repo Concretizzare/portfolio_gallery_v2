@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -8,7 +8,7 @@ interface AmbientParticlesProps {
   count?: number
 }
 
-export function AmbientParticles({ count = 80 }: AmbientParticlesProps) {
+export const AmbientParticles = memo(function AmbientParticles({ count = 50 }: AmbientParticlesProps) {
   const pointsRef = useRef<THREE.Points>(null)
 
   const geometry = useMemo(() => {
@@ -17,7 +17,7 @@ export function AmbientParticles({ count = 80 }: AmbientParticlesProps) {
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3
-      const radius = 5 + Math.random() * 12
+      const radius = 5 + Math.random() * 10
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(2 * Math.random() - 1)
 
@@ -32,19 +32,19 @@ export function AmbientParticles({ count = 80 }: AmbientParticlesProps) {
 
   useFrame((state) => {
     if (!pointsRef.current) return
-    pointsRef.current.rotation.y = state.clock.elapsedTime * 0.02
+    pointsRef.current.rotation.y = state.clock.elapsedTime * 0.015
   })
 
   return (
-    <points ref={pointsRef} geometry={geometry}>
+    <points ref={pointsRef} geometry={geometry} frustumCulled>
       <pointsMaterial
-        size={0.04}
+        size={0.035}
         color="#E8E4DF"
         transparent
-        opacity={0.35}
+        opacity={0.3}
         sizeAttenuation
         depthWrite={false}
       />
     </points>
   )
-}
+})

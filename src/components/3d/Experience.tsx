@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, memo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useNavigationStore } from '@/store/navigation'
@@ -9,9 +9,9 @@ import { easeOutExpo, lerpVector3, lerp } from '@/lib/utils'
 import { OpticalInstrument } from './OpticalInstrument'
 import { AmbientParticles } from './AmbientParticles'
 
-const TRANSITION_DURATION = 0.6
+const TRANSITION_DURATION = 0.5
 
-export function Experience() {
+export const Experience = memo(function Experience() {
   const { camera } = useThree()
   const transitionStartTime = useRef<number | null>(null)
   const startPosition = useRef<[number, number, number]>([0, 0, 8])
@@ -30,7 +30,7 @@ export function Experience() {
     const timer = setTimeout(() => {
       setLoading(false)
       setLoadingProgress(100)
-    }, 1500)
+    }, 1200)
     return () => clearTimeout(timer)
   }, [setLoading, setLoadingProgress])
 
@@ -77,14 +77,14 @@ export function Experience() {
   return (
     <>
       <color attach="background" args={['#0A0A0B']} />
-      <fog attach="fog" args={['#0A0A0B', 10, 25]} />
+      <fog attach="fog" args={['#0A0A0B', 12, 22]} />
 
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[5, 5, 5]} intensity={0.6} />
-      <pointLight position={[0, 0, 4]} intensity={0.4} color="#E8E4DF" distance={12} />
+      <ambientLight intensity={0.25} />
+      <directionalLight position={[5, 5, 5]} intensity={0.5} />
+      <pointLight position={[0, 0, 4]} intensity={0.35} color="#E8E4DF" distance={10} />
 
       <OpticalInstrument />
-      <AmbientParticles count={80} />
+      <AmbientParticles count={40} />
     </>
   )
-}
+})

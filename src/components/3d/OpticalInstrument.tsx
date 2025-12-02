@@ -1,13 +1,13 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Ring, Text, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { useNavigationStore, SECTION_ORDER, PROJECT_SECTIONS } from '@/store/navigation'
 import { PROJECTS } from '@/lib/utils'
 
-function ApertureBlades() {
+const ApertureBlades = memo(function ApertureBlades() {
   const groupRef = useRef<THREE.Group>(null)
   const { currentSection } = useNavigationStore()
 
@@ -26,7 +26,7 @@ function ApertureBlades() {
     groupRef.current.rotation.z = THREE.MathUtils.lerp(
       groupRef.current.rotation.z,
       targetRotation,
-      0.06
+      0.08
     )
   })
 
@@ -58,7 +58,7 @@ function ApertureBlades() {
       ))}
     </group>
   )
-}
+})
 
 interface ProjectBladeProps {
   project: typeof PROJECTS[number] & {
@@ -69,7 +69,7 @@ interface ProjectBladeProps {
   isActive: boolean
 }
 
-function ProjectBlade({ project, index, isActive }: ProjectBladeProps) {
+const ProjectBlade = memo(function ProjectBlade({ project, index, isActive }: ProjectBladeProps) {
   const groupRef = useRef<THREE.Group>(null)
 
   useFrame(() => {
@@ -78,13 +78,13 @@ function ProjectBlade({ project, index, isActive }: ProjectBladeProps) {
     groupRef.current.position.z = THREE.MathUtils.lerp(
       groupRef.current.position.z,
       targetZ,
-      0.1
+      0.12
     )
   })
 
   return (
     <group ref={groupRef} position={project.position}>
-      <RoundedBox args={[0.9, 1.3, 0.05]} radius={0.05} smoothness={2}>
+      <RoundedBox args={[0.9, 1.3, 0.05]} radius={0.05} smoothness={1}>
         <meshStandardMaterial
           color={isActive ? project.color : '#1a1a1d'}
           metalness={0.5}
@@ -116,25 +116,23 @@ function ProjectBlade({ project, index, isActive }: ProjectBladeProps) {
       </Text>
     </group>
   )
-}
+})
 
-function CoreLens() {
+const CoreLens = memo(function CoreLens() {
   const outerRef = useRef<THREE.Mesh>(null)
   const innerRef = useRef<THREE.Mesh>(null)
-  const { currentSection } = useNavigationStore()
-  const isLanding = currentSection === 'landing'
 
   useFrame((state) => {
     if (!outerRef.current || !innerRef.current) return
     const time = state.clock.elapsedTime
-    outerRef.current.rotation.z = time * 0.08
-    innerRef.current.rotation.z = -time * 0.12
+    outerRef.current.rotation.z = time * 0.06
+    innerRef.current.rotation.z = -time * 0.09
   })
 
   return (
     <group>
       <mesh ref={outerRef}>
-        <torusGeometry args={[2, 0.12, 16, 48]} />
+        <torusGeometry args={[2, 0.12, 12, 32]} />
         <meshStandardMaterial
           color="#1A1A1D"
           metalness={0.9}
@@ -143,7 +141,7 @@ function CoreLens() {
       </mesh>
 
       <mesh ref={innerRef}>
-        <torusGeometry args={[1.6, 0.06, 12, 48]} />
+        <torusGeometry args={[1.6, 0.06, 8, 32]} />
         <meshStandardMaterial
           color="#E8E4DF"
           metalness={0.85}
@@ -154,7 +152,7 @@ function CoreLens() {
       </mesh>
 
       <mesh>
-        <circleGeometry args={[1.4, 48]} />
+        <circleGeometry args={[1.4, 32]} />
         <meshStandardMaterial
           color="#0f0f10"
           metalness={0.9}
@@ -165,7 +163,7 @@ function CoreLens() {
       </mesh>
 
       <mesh position={[0, 0, 0.01]}>
-        <ringGeometry args={[0.3, 1.4, 48]} />
+        <ringGeometry args={[0.3, 1.4, 32]} />
         <meshBasicMaterial
           color="#E8E4DF"
           transparent
@@ -174,22 +172,22 @@ function CoreLens() {
       </mesh>
     </group>
   )
-}
+})
 
-function OuterRing() {
+const OuterRing = memo(function OuterRing() {
   const ringRef = useRef<THREE.Group>(null)
 
   useFrame((state) => {
     if (!ringRef.current) return
-    ringRef.current.rotation.z = state.clock.elapsedTime * 0.03
+    ringRef.current.rotation.z = state.clock.elapsedTime * 0.02
   })
 
   const notches = useMemo(() => {
-    const count = 36
+    const count = 24
     return Array.from({ length: count }, (_, i) => {
       const angle = (i * Math.PI * 2) / count
       const radius = 4.2
-      const isMain = i % 6 === 0
+      const isMain = i % 4 === 0
       return {
         position: [
           Math.cos(angle) * radius,
@@ -205,7 +203,7 @@ function OuterRing() {
 
   return (
     <group ref={ringRef}>
-      <Ring args={[3.9, 4.1, 64]}>
+      <Ring args={[3.9, 4.1, 32]}>
         <meshStandardMaterial
           color="#0A0A0B"
           metalness={0.9}
@@ -231,24 +229,24 @@ function OuterRing() {
       ))}
     </group>
   )
-}
+})
 
-export function OpticalInstrument() {
+export const OpticalInstrument = memo(function OpticalInstrument() {
   const groupRef = useRef<THREE.Group>(null)
 
   useFrame((state) => {
     if (!groupRef.current) return
-    const mouseX = state.pointer.x * 0.02
-    const mouseY = state.pointer.y * 0.02
+    const mouseX = state.pointer.x * 0.015
+    const mouseY = state.pointer.y * 0.015
     groupRef.current.rotation.x = THREE.MathUtils.lerp(
       groupRef.current.rotation.x,
       mouseY,
-      0.03
+      0.04
     )
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
       mouseX,
-      0.03
+      0.04
     )
   })
 
@@ -259,4 +257,4 @@ export function OpticalInstrument() {
       <OuterRing />
     </group>
   )
-}
+})
