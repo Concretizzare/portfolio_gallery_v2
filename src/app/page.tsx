@@ -1819,7 +1819,7 @@ export default function GalleryPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: categorySectionIndex === categoryProjects.length + 1 ? 1 : 0 }}
                   transition={{ duration: 0.5 }}
-                  className="absolute inset-0 flex items-center justify-center px-4 md:px-8 lg:px-12"
+                  className="absolute inset-0 flex items-start md:items-center justify-center px-4 md:px-8 lg:px-12 pt-16 md:pt-0 overflow-y-auto"
                   style={{ pointerEvents: categorySectionIndex === categoryProjects.length + 1 ? 'auto' : 'none' }}
                 >
                   <motion.div
@@ -1828,18 +1828,18 @@ export default function GalleryPage() {
                     transition={{ duration: 0.6 }}
                     className="max-w-4xl w-full text-center"
                   >
-                    <span className="text-xs uppercase tracking-[0.2em] mb-4 block" style={{ color: currentCategory.accentColor }}>
+                    <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] mb-2 md:mb-4 block" style={{ color: currentCategory.accentColor }}>
                       Creative Capabilities
                     </span>
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4">
+                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-light mb-2 md:mb-4">
                       Visual Excellence
                     </h2>
-                    <p className="text-[#6B6B70] text-sm md:text-base mb-10 max-w-lg mx-auto">
+                    <p className="text-[#6B6B70] text-xs md:text-base mb-6 md:mb-10 max-w-lg mx-auto">
                       AI-powered media generation showcasing our ability to transform static content into dynamic experiences
                     </p>
 
                     {/* Preview Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
                       {SHOWCASE_ITEMS.slice(0, 3).map((item, i) => {
                         const videoSrc = item.generated.find(g => g.type === 'video')?.src
                         const isPlaying = playingPreviewReel === item.id
@@ -1854,7 +1854,7 @@ export default function GalleryPage() {
                                 setPlayingPreviewReel(isPlaying ? null : item.id)
                               }
                             }}
-                            className="relative group rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square cursor-pointer"
+                            className="relative group rounded-lg md:rounded-xl overflow-hidden border border-[#2a2a2d] bg-[#141416] aspect-square cursor-pointer"
                           >
                             {isPlaying && videoSrc ? (
                               <video
@@ -1875,12 +1875,12 @@ export default function GalleryPage() {
                               />
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                              <h4 className="text-sm font-medium text-[#E8E4DF] mb-1">{item.title}</h4>
-                              <p className="text-xs text-[#6B6B70] line-clamp-2">{item.description}</p>
+                            <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
+                              <h4 className="text-[10px] md:text-sm font-medium text-[#E8E4DF] mb-0.5 md:mb-1">{item.title}</h4>
+                              <p className="text-[8px] md:text-xs text-[#6B6B70] line-clamp-1 md:line-clamp-2 hidden md:block">{item.description}</p>
                             </div>
                             {videoSrc && (
-                              <div className={`absolute top-3 right-3 w-8 h-8 rounded-full ${isPlaying ? 'bg-white/20' : 'bg-white/10'} backdrop-blur-sm flex items-center justify-center transition-all`}>
+                              <div className={`absolute top-1.5 right-1.5 md:top-3 md:right-3 w-5 h-5 md:w-8 md:h-8 rounded-full ${isPlaying ? 'bg-white/20' : 'bg-white/10'} backdrop-blur-sm flex items-center justify-center transition-all`}>
                                 {isPlaying ? (
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                                     <rect x="6" y="4" width="4" height="16" />

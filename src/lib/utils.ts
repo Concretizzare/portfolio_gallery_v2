@@ -154,7 +154,7 @@ export const PROJECTS = [
     slug: 'project-ai-render',
     title: 'Smart Render',
     subtitle: 'AI Rendering Tool',
-    description: 'AI-powered interior design visualization platform that transforms raw room photos into photorealistic rendered interiors. Users upload unfinished spaces, select premium materials from a curated library of 294 professional finishes, and receive stunning visualizations in seconds. Features advanced editing with point-and-click precision, multi-angle support, and complete design iteration workflow.',
+    description: 'AI-powered interior design visualization platform that transforms raw room photos into photorealistic rendered interiors. Users upload unfinished spaces, select premium materials from a curated library of 294 professional finishes, and receive stunning visualizations in seconds.',
     tech: ['React 19', 'TypeScript', 'Vite', 'Tailwind CSS', 'Google Gemini AI', 'Vercel Serverless'],
     color: '#F5F5F5',
     url: null,
