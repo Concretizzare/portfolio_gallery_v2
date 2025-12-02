@@ -668,7 +668,7 @@ export default function GalleryPage() {
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extralight text-white tracking-tight">
                   Portfolio
                 </h1>
-                <p className="text-[#52525b] text-sm mt-2">Select a category to explore</p>
+                <p className="text-[#52525b] text-sm mt-2 mb-3 md:mb-0">Select a category to explore</p>
               </motion.div>
             </div>
 
@@ -726,7 +726,7 @@ export default function GalleryPage() {
                     }}
                     style={{
                       transformStyle: 'preserve-3d',
-                      zIndex: 50 - Math.abs(offset),
+                      zIndex: 100 - Math.abs(offset),
                       pointerEvents: isActive ? 'auto' : 'none'
                     }}
                   >
