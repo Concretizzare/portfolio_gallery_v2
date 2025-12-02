@@ -658,7 +658,7 @@ export default function GalleryPage() {
             />
 
             {/* Title - positioned between menu and cards */}
-            <div className="absolute top-[12%] left-0 right-0 z-10">
+            <div className="absolute top-[4%] md:top-[12%] left-0 right-0 z-10">
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -711,7 +711,7 @@ export default function GalleryPage() {
                 return (
                   <motion.div
                     key={category.id}
-                    className="absolute w-full max-w-[680px] lg:max-w-[820px]"
+                    className="absolute w-[85%] sm:w-full max-w-[680px] lg:max-w-[820px]"
                     initial={false}
                     animate={{
                       x: `${offset * 105}%`,
