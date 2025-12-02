@@ -588,6 +588,7 @@ export default function GalleryPage() {
   }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
 
   // Auto-rotate showcase preview carousel on mobile (6800ms)
+  // Reset timer when user swipes by including showcasePreviewIndex in deps
   useEffect(() => {
     if (!selectedCategory || !currentCategory?.showShowcase) return
     if (categorySectionIndex !== categoryProjects.length + 1) return
@@ -597,7 +598,7 @@ export default function GalleryPage() {
     }, 6800)
 
     return () => clearInterval(interval)
-  }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
+  }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length, showcasePreviewIndex])
 
   const project = selectedProject ? PROJECTS.find(p => p.id === selectedProject) : null
 
