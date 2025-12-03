@@ -309,52 +309,30 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
 
     const handleWheel = (e: WheelEvent) => {
       if (selectedProject || showShowcase) return
+      e.preventDefault()
 
-      // Detect if it's a mouse wheel (large deltaY) or touchpad (small deltaY)
-      const isTouchpad = Math.abs(e.deltaY) < 50
+      if (isScrolling) return
 
-      if (isTouchpad) {
-        // Touchpad: accumulate small deltas
-        e.preventDefault()
-        touchpadDelta += e.deltaY
+      touchpadDelta += e.deltaY
+      clearTimeout(touchpadTimeout)
 
-        // Clear previous timeout
-        clearTimeout(touchpadTimeout)
+      // High threshold to prevent accidental skips
+      if (Math.abs(touchpadDelta) > 400) {
+        isScrolling = true
+        const delta = touchpadDelta > 0 ? 1 : -1
+        setActiveSection(prev => Math.max(0, Math.min(sections.length - 1, prev + delta)))
+        touchpadDelta = 0
 
-        // When accumulated delta reaches threshold, change section
-        // Higher threshold (250) to prevent skipping sections with fast swipes
-        if (Math.abs(touchpadDelta) > 250 && !isScrolling) {
-          isScrolling = true
-          const delta = touchpadDelta > 0 ? 1 : -1
-          setActiveSection(prev => Math.max(0, Math.min(sections.length - 1, prev + delta)))
-          touchpadDelta = 0
-
-          setTimeout(() => {
-            isScrolling = false
-          }, 600)
-        }
-
-        // Reset accumulated delta if user stops scrolling
-        touchpadTimeout = setTimeout(() => {
-          touchpadDelta = 0
-        }, 200)
-      } else {
-        // Mouse wheel: hijack and snap to sections immediately
-        if (!isScrolling) {
-          e.preventDefault()
-          isScrolling = true
-
-          const delta = e.deltaY > 0 ? 1 : -1
-          setActiveSection(prev => Math.max(0, Math.min(sections.length - 1, prev + delta)))
-
-          clearTimeout(scrollTimeout)
-          scrollTimeout = setTimeout(() => {
-            isScrolling = false
-          }, 800)
-        } else {
-          e.preventDefault()
-        }
+        // Long cooldown to prevent multiple triggers
+        setTimeout(() => {
+          isScrolling = false
+        }, 1000)
       }
+
+      // Reset delta after inactivity
+      touchpadTimeout = setTimeout(() => {
+        touchpadDelta = 0
+      }, 300)
     }
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -422,49 +400,34 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
 
-      // Detect if it's a mouse wheel (large deltaY) or touchpad (small deltaY)
-      const isTouchpad = Math.abs(e.deltaY) < 50
+      if (isScrolling) {
+        e.stopPropagation()
+        return
+      }
 
-      if (isTouchpad) {
-        // Touchpad: accumulate small deltas
-        touchpadDelta += e.deltaY
-        clearTimeout(touchpadTimeout)
+      touchpadDelta += e.deltaY
+      clearTimeout(touchpadTimeout)
 
-        // When accumulated delta reaches threshold, change section
-        if (Math.abs(touchpadDelta) > 250 && !isScrolling) {
-          isScrolling = true
-          if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
-            setCategorySectionIndex(prev => prev + 1)
-          } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
-            setCategorySectionIndex(prev => prev - 1)
-          }
-          touchpadDelta = 0
-
-          setTimeout(() => {
-            isScrolling = false
-          }, 600)
-        }
-
-        // Reset accumulated delta if user stops scrolling
-        touchpadTimeout = setTimeout(() => {
-          touchpadDelta = 0
-        }, 200)
-      } else {
-        // Mouse wheel: snap to sections immediately
-        if (isScrolling) return
+      // High threshold to prevent accidental skips
+      if (Math.abs(touchpadDelta) > 400) {
         isScrolling = true
-        clearTimeout(scrollTimeout)
-
-        if (e.deltaY > 0 && categorySectionIndex < totalSections - 1) {
+        if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
           setCategorySectionIndex(prev => prev + 1)
-        } else if (e.deltaY < 0 && categorySectionIndex > 0) {
+        } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
           setCategorySectionIndex(prev => prev - 1)
         }
+        touchpadDelta = 0
 
-        scrollTimeout = setTimeout(() => {
+        // Long cooldown to prevent multiple triggers
+        setTimeout(() => {
           isScrolling = false
-        }, 800)
+        }, 1000)
       }
+
+      // Reset delta after inactivity
+      touchpadTimeout = setTimeout(() => {
+        touchpadDelta = 0
+      }, 300)
     }
 
     // Touch event handlers for mobile swipe
