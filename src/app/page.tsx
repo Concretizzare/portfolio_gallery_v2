@@ -315,8 +315,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       touchpadDelta += e.deltaY
       clearTimeout(touchpadTimeout)
 
-      // High threshold to prevent accidental skips
-      if (Math.abs(touchpadDelta) > 400) {
+      // Threshold for section change
+      if (Math.abs(touchpadDelta) > 250) {
         isScrolling = true
         const delta = touchpadDelta > 0 ? 1 : -1
         setActiveSection(prev => Math.max(0, Math.min(sections.length - 1, prev + delta)))
@@ -406,8 +406,8 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       touchpadDelta += e.deltaY
       clearTimeout(touchpadTimeout)
 
-      // High threshold to prevent accidental skips
-      if (Math.abs(touchpadDelta) > 400) {
+      // Threshold for section change
+      if (Math.abs(touchpadDelta) > 250) {
         isScrolling = true
         if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
           setCategorySectionIndex(prev => prev + 1)
