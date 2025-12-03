@@ -421,46 +421,30 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
-      const isTouchpad = Math.abs(e.deltaY) < 50
 
-      if (isTouchpad) {
-        touchpadDelta += e.deltaY
-        clearTimeout(touchpadTimeout)
+      // Always accumulate - works for both touchpad and mouse wheel
+      touchpadDelta += e.deltaY
+      clearTimeout(touchpadTimeout)
 
-        // When accumulated delta reaches threshold, change section immediately
-        if (Math.abs(touchpadDelta) > 250 && !isScrolling) {
-          isScrolling = true
-          if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
-            setCategorySectionIndex(prev => prev + 1)
-          } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
-            setCategorySectionIndex(prev => prev - 1)
-          }
-          touchpadDelta = 0
-
-          setTimeout(() => {
-            isScrolling = false
-          }, 600)
-        }
-
-        // Reset accumulated delta if user stops scrolling
-        touchpadTimeout = setTimeout(() => {
-          touchpadDelta = 0
-        }, 200)
-      } else {
-        if (isScrolling) return
+      // When accumulated delta reaches threshold, change section
+      if (Math.abs(touchpadDelta) > 120 && !isScrolling) {
         isScrolling = true
-        clearTimeout(scrollTimeout)
-
-        if (e.deltaY > 0 && categorySectionIndex < totalSections - 1) {
+        if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
           setCategorySectionIndex(prev => prev + 1)
-        } else if (e.deltaY < 0 && categorySectionIndex > 0) {
+        } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
           setCategorySectionIndex(prev => prev - 1)
         }
+        touchpadDelta = 0
 
-        scrollTimeout = setTimeout(() => {
+        setTimeout(() => {
           isScrolling = false
-        }, 800)
+        }, 700)
       }
+
+      // Reset accumulated delta if user stops scrolling
+      touchpadTimeout = setTimeout(() => {
+        touchpadDelta = 0
+      }, 150)
     }
 
     // Touch event handlers for mobile swipe
