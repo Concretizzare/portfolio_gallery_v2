@@ -426,16 +426,26 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       if (isTouchpad) {
         touchpadDelta += e.deltaY
         clearTimeout(touchpadTimeout)
-        touchpadTimeout = setTimeout(() => {
-          if (Math.abs(touchpadDelta) > 150) {
-            if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
-              setCategorySectionIndex(prev => prev + 1)
-            } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
-              setCategorySectionIndex(prev => prev - 1)
-            }
+
+        // When accumulated delta reaches threshold, change section immediately
+        if (Math.abs(touchpadDelta) > 250 && !isScrolling) {
+          isScrolling = true
+          if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
+            setCategorySectionIndex(prev => prev + 1)
+          } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
+            setCategorySectionIndex(prev => prev - 1)
           }
           touchpadDelta = 0
-        }, 50)
+
+          setTimeout(() => {
+            isScrolling = false
+          }, 600)
+        }
+
+        // Reset accumulated delta if user stops scrolling
+        touchpadTimeout = setTimeout(() => {
+          touchpadDelta = 0
+        }, 200)
       } else {
         if (isScrolling) return
         isScrolling = true
