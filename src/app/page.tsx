@@ -301,7 +301,6 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
 
   useEffect(() => {
     let isScrolling = false
-    let scrollTimeout: NodeJS.Timeout
     let touchpadDelta = 0
     let touchpadTimeout: NodeJS.Timeout
     let touchStartY = 0
@@ -373,7 +372,6 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       window.removeEventListener('touchstart', handleTouchStart)
       window.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('touchend', handleTouchEnd)
-      clearTimeout(scrollTimeout)
       clearTimeout(touchpadTimeout)
     }
   }, [sections.length, selectedProject, showShowcase])
