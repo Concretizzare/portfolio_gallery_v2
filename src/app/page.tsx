@@ -388,6 +388,10 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
   const categoryProjects = currentCategory ? PROJECTS.filter(p => currentCategory.projectIds.includes(p.id)) : []
 
   // Handle scroll navigation for Category modal
+  const totalCategorySections = currentCategory
+    ? categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 3 : 2)
+    : 0
+
   useEffect(() => {
     if (!selectedCategory || !currentCategory) return
 
@@ -397,8 +401,6 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
     let touchpadTimeout: NodeJS.Timeout
     let touchStartY = 0
     let touchStartTime = 0
-
-    const totalSections = categoryProjects.length + (currentCategory.showShowcase || currentCategory.mcpProjects ? 3 : 2)
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -415,11 +417,14 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       // Threshold for section change
       if (Math.abs(touchpadDelta) > 250) {
         isScrolling = true
-        if (touchpadDelta > 0 && categorySectionIndex < totalSections - 1) {
-          setCategorySectionIndex(prev => prev + 1)
-        } else if (touchpadDelta < 0 && categorySectionIndex > 0) {
-          setCategorySectionIndex(prev => prev - 1)
-        }
+        setCategorySectionIndex(prev => {
+          if (touchpadDelta > 0 && prev < totalCategorySections - 1) {
+            return prev + 1
+          } else if (touchpadDelta < 0 && prev > 0) {
+            return prev - 1
+          }
+          return prev
+        })
         touchpadDelta = 0
 
         // Cooldown - ignore all scroll during this time
@@ -452,13 +457,14 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       if (Math.abs(deltaY) > 50 && deltaTime < 500) {
         isScrolling = true
 
-        if (deltaY > 0 && categorySectionIndex < totalSections - 1) {
-          // Swipe up - next section
-          setCategorySectionIndex(prev => prev + 1)
-        } else if (deltaY < 0 && categorySectionIndex > 0) {
-          // Swipe down - previous section
-          setCategorySectionIndex(prev => prev - 1)
-        }
+        setCategorySectionIndex(prev => {
+          if (deltaY > 0 && prev < totalCategorySections - 1) {
+            return prev + 1
+          } else if (deltaY < 0 && prev > 0) {
+            return prev - 1
+          }
+          return prev
+        })
 
         scrollTimeout = setTimeout(() => {
           isScrolling = false
@@ -477,7 +483,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       clearTimeout(scrollTimeout)
       clearTimeout(touchpadTimeout)
     }
-  }, [selectedCategory, currentCategory, categorySectionIndex, categoryProjects.length])
+  }, [selectedCategory, currentCategory, totalCategorySections])
 
   // Auto-rotate showcase preview carousel on mobile (6800ms)
   // Reset timer when user swipes by including showcasePreviewIndex in deps
