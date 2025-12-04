@@ -310,7 +310,11 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
       if (selectedProject || showShowcase) return
       e.preventDefault()
 
-      if (isScrolling) return
+      // During cooldown, ignore all scroll and reset delta
+      if (isScrolling) {
+        touchpadDelta = 0
+        return
+      }
 
       touchpadDelta += e.deltaY
       clearTimeout(touchpadTimeout)
@@ -322,9 +326,10 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         setActiveSection(prev => Math.max(0, Math.min(sections.length - 1, prev + delta)))
         touchpadDelta = 0
 
-        // Long cooldown to prevent multiple triggers
+        // Cooldown - ignore all scroll during this time
         setTimeout(() => {
           isScrolling = false
+          touchpadDelta = 0
         }, 1000)
       }
 
@@ -398,8 +403,9 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
 
+      // During cooldown, ignore all scroll and reset delta
       if (isScrolling) {
-        e.stopPropagation()
+        touchpadDelta = 0
         return
       }
 
@@ -416,9 +422,10 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         }
         touchpadDelta = 0
 
-        // Long cooldown to prevent multiple triggers
+        // Cooldown - ignore all scroll during this time
         setTimeout(() => {
           isScrolling = false
+          touchpadDelta = 0
         }, 1000)
       }
 
