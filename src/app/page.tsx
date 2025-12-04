@@ -330,7 +330,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         setTimeout(() => {
           isScrolling = false
           touchpadDelta = 0
-        }, 1000)
+        }, 600)
       }
 
       // Reset delta after inactivity
@@ -431,7 +431,7 @@ export default function GalleryPage({ initialCategory = null, initialProject = n
         setTimeout(() => {
           isScrolling = false
           touchpadDelta = 0
-        }, 1000)
+        }, 600)
       }
 
       // Reset delta after inactivity
